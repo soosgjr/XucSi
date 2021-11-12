@@ -1,4 +1,4 @@
-#define CHEAT TRUE //(SystemGet(SYS_KEYDOWN, 282, 0))  // F1
+#define CHEAT FALSE // (SystemGet(SYS_KEYDOWN, 282, 0))  // F1
 #define SHOW_STAT_SUM FALSE
 
 
@@ -114,6 +114,8 @@ Spawn()
   monster_mode = FALSE
   load = FALSE
 
+
+  SAVE.ImportSaves()
 
   // Check for paying customers...
   num_class = 2
@@ -236,8 +238,8 @@ int ClassSetup(int class, int getscript)
   
   if(load)
     class = 100 + (class_list>>8)
-    slot = (class - 100) * 100
-    class = FileReadByte("FILE:SAVE.DAT", 29 + slot)
+    slot = class - 99
+    class = SAVE.GetClass(slot)
     if(class == CLASS_GNOME || class == CLASS_DWARF || class == CLASS_HUBBIN)
       modelfile = "FILE:PLAYERSM.RDY"
     else
@@ -247,7 +249,7 @@ int ClassSetup(int class, int getscript)
   scriptfile = "FILE:CPLAYER.RUN"
   self.class = class
   if(load)
-    if(FileReadByte("FILE:SAVE.DAT", 24 + slot) != 0)
+    if(SAVE.GetMaxHP(slot) != 0)
       CPLAYER.ModelSetup()
   else
     CPLAYER.ModelSetup()
@@ -390,8 +392,8 @@ Event()
     //////XENON MOD: Loading//////
   if(load)
     class = 100 + (class_list>>8)
-    slot = (class - 100) * 100
-    class = FileReadByte("FILE:SAVE.DAT", 29 + slot)
+    slot = class - 99
+    class = SAVE.GetClass(slot)
     
   if(monster_mode)
     scriptfile = MonsterSetup(class, TRUE)
@@ -453,8 +455,8 @@ Refresh()
     //////XENON MOD: Loading//////
   if(load)
     class = 100 + (class_list>>8)
-    slot = (class - 100) * 100
-    class = FileReadByte("FILE:SAVE.DAT", 29 + slot)
+    slot = class - 99
+    class = SAVE.GetClass(slot)
   
   if(monster_mode)
     // We're allowing the user to pick monster types...
@@ -535,15 +537,15 @@ Refresh()
   //////XENON MOD: Loading//////
   else
     class = 100 + (class_list>>8)
-    class = FileReadByte("FILE:SAVE.DAT", 29 + slot)
-    self.eqhelm = FileReadByte("FILE:SAVE.DAT", 46 + slot)
-    self.eqbody = FileReadByte("FILE:SAVE.DAT", 47 + slot)
-    self.eqlegs = FileReadByte("FILE:SAVE.DAT", 48 + slot)
-    self.eqleft = FileReadByte("FILE:SAVE.DAT", 42 + slot)
-    self.eqright = FileReadByte("FILE:SAVE.DAT", 43 + slot)
-    self.eqcol01 = FileReadByte("FILE:SAVE.DAT", 40 + slot)
-    self.eqcol23 = FileReadByte("FILE:SAVE.DAT", 41 + slot)
-    self.tetimer = FileReadByte("FILE:SAVE.DAT", 90 + slot)
+    class = SAVE.GetClass(slot)
+    self.eqhelm = SAVE.GetHelmet(slot)
+    self.eqbody = SAVE.GetBodyArmor(slot)
+    self.eqlegs = SAVE.GetLegArmor(slot)
+    self.eqleft = SAVE.GetLeftHandItem(slot)
+    self.eqright = SAVE.GetRightHandItem(slot)
+    self.eqcol01 = SAVE.GetPrimaryColour(slot)
+    self.eqcol23 = SAVE.GetSecondaryColour(slot)
+    self.tetimer = SAVE.GetTETimer(slot)
 
     self.class = 100 + (class_list>>8)
     if(monster_mode)
@@ -730,7 +732,7 @@ Refresh()
     StringClear(String(0))
 
   if(load)
-    class = FileReadByte("FILE:SAVE.DAT", 29 + slot)
+    class = SAVE.GetClass(slot)
     WindowString(WHITE, 0.0, 0.0, self.name)
   else
     // Name input...
@@ -781,7 +783,9 @@ Refresh()
     else
       //////XENON MOD: Loading//////
       //class_list = 0
-      class_list = WindowMiniList(0.0, 1.0, 16, 12, class_list, "Slot 1,Slot 2,Slot 3,Slot 4,Slot 5,Slot 6,Slot 7,Slot 8,Slot 9,Slot 10,Slot 11,Slot 12")
+      StringClear(String(0))
+      SAVE.AppendNames(String(0), 0)
+      class_list = WindowMiniList(0.0, 1.0, 16, 12, class_list, String(0))
 
 
   // Restore the random seed...
@@ -801,13 +805,7 @@ Refresh()
   //////XENON MOD: Loading//////
   if(load)
     //Refresh character name
-    i = slot
-    j = slot + 16
-    char = 0
-    while(i < j)
-      StringSetValue(self.name, char, FileReadByte("FILE:SAVE.DAT", i))
-      char++
-      i++
+    SAVE.GetName(slot, self.name, 0)
 
 
 
@@ -832,7 +830,7 @@ Refresh()
 
 
   // Team select cheat & monster cheat...
-  if(SystemGet(SYS_DEVTOOL, 0, 0) && CHEAT)
+  if(SystemGet(SYS_DEVTOOL, 0, 0))
     if(team == TEAM_GOOD)
       if(ButtonImage(0, -0.5, -2.5, 6.0, 2.0, "Good") == 255)
         team = TEAM_MONSTER
@@ -840,21 +838,20 @@ Refresh()
       if(ButtonImage(0, -0.5, -2.5, 6.0, 2.0, "Mons") == 255)
         team = TEAM_GOOD
 
+  if(SystemGet(SYS_PAYINGCUSTOMER, 0, 0))
     if(monster_mode)
       if(ButtonImage(0, 14.5, -2.5, 6.0, 2.0, "Mons") == 255)
         load = TRUE
         //Load name
-        i = slot
-        j = slot + 16
-        char = 0
-        while(i < j)
-          StringSetValue(self.name, char, FileReadByte("FILE:SAVE.DAT", i))
-          char++
-          i++
+        SAVE.GetName(slot, self.name, 0)
         monster_mode = FALSE
     if (monster_mode == FALSE && load == FALSE)
       if(ButtonImage(0, 14.5, -2.5, 6.0, 2.0, "Human") == 255)
-        monster_mode = TRUE
+        if(SystemGet(SYS_DEVTOOL, 0, 0))
+          monster_mode = TRUE
+        else
+          load = TRUE
+          SAVE.GetName(slot, self.name, 0)
     if(load == TRUE)
       if(ButtonImage(0, 14.5, -2.5, 6.0, 2.0, "LOAD") == 255)
         load = FALSE

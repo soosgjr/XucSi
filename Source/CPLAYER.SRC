@@ -964,7 +964,7 @@ int Refresh()
 
 //-----------------------------------------------------------------------
 int Spawn()
-  int self, i, j, char, slot
+  int self, i, slot
   self = FindSelf()
 
   self.boxsize = 0.85
@@ -1051,69 +1051,8 @@ int Spawn()
 
   
   if(self.class >= 100 && self.class <= 112)
-    slot = (self.class - 100) * 100
-    i = slot
-    j = 16 + slot
-    char = 0
-    while(i < j)
-      StringSetValue(self.name, char, FileReadByte("FILE:SAVE.DAT", i))
-      char++
-      i++
-    self.hits = FileReadByte("FILE:SAVE.DAT", 20 + slot)
-    self.mana = FileReadByte("FILE:SAVE.DAT", 21 + slot)
-    self.hitstap = FileReadByte("FILE:SAVE.DAT", 22 + slot)
-    self.manatap = FileReadByte("FILE:SAVE.DAT", 23 + slot)
-    self.hitsmax = FileReadByte("FILE:SAVE.DAT", 24 + slot)
-    self.manamax = FileReadByte("FILE:SAVE.DAT", 25 + slot)
-    self.keys = FileReadByte("FILE:SAVE.DAT", 26 + slot)
-    self.class = FileReadByte("FILE:SAVE.DAT", 29 + slot)
-    self.str = FileReadByte("FILE:SAVE.DAT", 30 + slot)
-    self.dex = FileReadByte("FILE:SAVE.DAT", 31 + slot)
-    self.int = FileReadByte("FILE:SAVE.DAT", 32 + slot)
-    self.vircomp = FileReadByte("FILE:SAVE.DAT", 33 + slot)
-    self.virdill = FileReadByte("FILE:SAVE.DAT", 34 + slot)
-    self.virhono = FileReadByte("FILE:SAVE.DAT", 35 + slot)
-    self.virfait = FileReadByte("FILE:SAVE.DAT", 36 + slot)
-    self.vircour = FileReadByte("FILE:SAVE.DAT", 37 + slot)
-    self.height = FileReadByte("FILE:SAVE.DAT", 38 + slot)
-    self.sflags = FileReadByte("FILE:SAVE.DAT", 39 + slot)
-    self.eqcol01 = FileReadByte("FILE:SAVE.DAT", 40 + slot)
-    self.eqcol23 = FileReadByte("FILE:SAVE.DAT", 41 + slot)
-    self.eqleft = FileReadByte("FILE:SAVE.DAT", 42 + slot)
-    self.eqright = FileReadByte("FILE:SAVE.DAT", 43 + slot)
-    self.eqspec1 = FileReadByte("FILE:SAVE.DAT", 44 + slot)
-    self.eqspec2 = FileReadByte("FILE:SAVE.DAT", 45 + slot)
-    self.eqhelm = FileReadByte("FILE:SAVE.DAT", 46 + slot)
-    self.eqbody = FileReadByte("FILE:SAVE.DAT", 47 + slot)
-    self.eqlegs = FileReadByte("FILE:SAVE.DAT", 48 + slot)
-    self.item00 = FileReadByte("FILE:SAVE.DAT", 49 + slot)
-    self.item01 = FileReadByte("FILE:SAVE.DAT", 50 + slot)
-    self.item02 = FileReadByte("FILE:SAVE.DAT", 51 + slot)
-    self.item03 = FileReadByte("FILE:SAVE.DAT", 52 + slot)
-    self.item04 = FileReadByte("FILE:SAVE.DAT", 53 + slot)
-    self.item05 = FileReadByte("FILE:SAVE.DAT", 54 + slot)
-    self.item06 = FileReadByte("FILE:SAVE.DAT", 55 + slot)
-    self.item07 = FileReadByte("FILE:SAVE.DAT", 56 + slot)
-    self.item08 = FileReadByte("FILE:SAVE.DAT", 57 + slot)
-    self.item09 = FileReadByte("FILE:SAVE.DAT", 58 + slot)
-    self.item10 = FileReadByte("FILE:SAVE.DAT", 59 + slot)
-    self.item11 = FileReadByte("FILE:SAVE.DAT", 60 + slot)
-    self.item12 = FileReadByte("FILE:SAVE.DAT", 61 + slot)
-    self.item13 = FileReadByte("FILE:SAVE.DAT", 62 + slot)
-    self.item14 = FileReadByte("FILE:SAVE.DAT", 63 + slot)
-    self.item15 = FileReadByte("FILE:SAVE.DAT", 64 + slot)
-    self.morphoc = FileReadByte("FILE:SAVE.DAT", 65 + slot)
-    self.exp = FileReadByte("FILE:SAVE.DAT", 66 + slot)
-    self.level = FileReadByte("FILE:SAVE.DAT", 67 + slot)
-    self.statpts = FileReadByte("FILE:SAVE.DAT", 68 + slot)
-    self.oflags = FileReadByte("FILE:SAVE.DAT", 69 + slot)
-    self.mflags = FileReadByte("FILE:SAVE.DAT", 70 + slot)
-    self.vflags = FileReadByte("FILE:SAVE.DAT", 71 + slot)
-    self.tetimer = FileReadByte("FILE:SAVE.DAT", 90 + slot)
-    self.money = FileReadByte("FILE:SAVE.DAT", 75 + slot) + FileReadByte("FILE:SAVE.DAT", 76 + slot) + FileReadByte("FILE:SAVE.DAT", 77 + slot) + FileReadByte("FILE:SAVE.DAT", 78 + slot) + FileReadByte("FILE:SAVE.DAT", 79 + slot) + FileReadByte("FILE:SAVE.DAT", 80 + slot) 
-    self.food = FileReadByte("FILE:SAVE.DAT", 81 + slot) + FileReadByte("FILE:SAVE.DAT", 82 + slot)
-    self.food = self.food * 100
-    self.food = self.food + FileReadByte("FILE:SAVE.DAT", 83 + slot)
+    slot = self.class - 99
+    SAVE.LoadCharacter(self, slot)
     
   else
     // Starting equipment...

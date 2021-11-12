@@ -1346,7 +1346,7 @@ Refresh()
               else
                 // Cost us half of our levels to respawn in town...
                 // Also cost us some random items (if we actually lose a level)...
-                if(binding.class != 100)   //CHECK FOR LOADING (XENON MOD)
+                if(binding.class < 100)   //CHECK FOR LOADING (XENON MOD)
                   LoseLevels(binding, binding.level>>1, 8)
               // !!!BAD!!!
               // !!!BAD!!! Position character better...
@@ -1385,8 +1385,9 @@ Refresh()
                 binding.hitstap = child.hitstap
                 binding.money = child.money
                 binding.keys = child.keys
-                slot = (binding.class - 100) * 100
-                binding.class = FileReadByte("FILE:SAVE.DAT", 29 + slot)
+                slot = binding.class - 99
+                binding.class = SAVE.GetClass(slot)
+                SAVE.LoadCompanions(binding, slot)
               else
                 binding.money = 0
                 binding.keys = 0
