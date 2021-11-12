@@ -1,0 +1,714 @@
+// format details
+#define COMPANION_SIZE 64
+#define COMPANIONS_OFFSET 80
+#define MAX_COMPANIONS 10
+#define NAME_LENGTH 16
+#define SLOT_COUNT 12
+
+// character details offsets
+#define CLASS_OFFSET 16
+#define PRIMARY_COLOUR_OFFSET 17
+#define SECONDARY_COLOUR_OFFSET 18
+#define HEIGHT_OFFSET 19
+
+// character stat offsets
+#define LEVEL_OFFSET 20
+#define STAT_POINTS_OFFSET 21
+#define BIG_EXPERIENCE_OFFSET 22
+#define SMALL_EXPERIENCE_OFFSET 23
+#define MAX_HP_OFFSET 24
+#define MAX_MANA_OFFSET 25
+#define TAPPED_MANA_OFFSET 26
+#define MANA_PROGRESS_OFFSET 27
+#define STRENGTH_OFFSET 28
+#define DEXTERITY_OFFSET 29
+#define INTELLIGENCE_OFFSET 30
+
+// character virtue offsets
+#define COMPASSION_OFFSET 31
+#define DILLIGENCE_OFFSET 32
+#define HONOR_OFFSET 33
+#define FAITH_OFFSET 34
+#define COURAGE_OFFSET 35
+
+// character equipment offsets
+#define LEFT_HAND_ITEM_OFFSET 36
+#define RIGHT_HAND_ITEM_OFFSET 37
+#define LEFT_SPECIAL_OFFSET 38
+#define RIGHT_SPECIAL_OFFSET 39
+#define HELMET_OFFSET 40
+#define BODY_ARMOR_OFFSET 41
+#define LEG_ARMOR_OFFSET 42
+
+// character inventory offsets
+#define BIG_MONEY_OFFSET 43
+#define SMALL_MONEY_OFFSET 44
+#define KEYS_OFFSET 45
+#define ITEM_1_OFFSET 46
+#define ITEM_2_OFFSET 47
+#define ITEM_3_OFFSET 48
+#define ITEM_4_OFFSET 49
+#define ITEM_5_OFFSET 50
+#define ITEM_6_OFFSET 51
+#define ITEM_7_OFFSET 52
+#define ITEM_8_OFFSET 53
+#define ITEM_9_OFFSET 54
+#define ITEM_10_OFFSET 55
+#define ITEM_11_OFFSET 56
+#define ITEM_12_OFFSET 57
+#define ITEM_13_OFFSET 58
+#define ITEM_14_OFFSET 59
+#define ITEM_15_OFFSET 60
+#define ITEM_16_OFFSET 61
+
+// character flag offsets
+#define SCRIPT_FLAGS_OFFSET 62
+#define VIRTUE_FLAGS_OFFSET 63
+#define MORE_FLAGS_OFFSET 64
+#define OTHER_FLAGS_OFFSET 65
+#define ENCHANT_FLAGS_OFFSET 66
+
+// misc character offsets
+#define MORPH_OFFSET 67
+#define TE_TIMER_OFFSET 68
+#define COMPANION_COUNT_OFFSET 79
+
+// companion detail offsets
+#define COMPANION_TYPE_OFFSET 16
+#define COMPANION_PRIMARY_COLOUR_OFFSET 17
+#define COMPANION_SECONDARY_COLOUR_OFFSET 18
+#define COMPANION_HEIGHT_OFFSET 19
+
+// companion stat offsets
+#define COMPANION_LEVEL_OFFSET 20
+#define COMPANION_BIG_EXPERIENCE_OFFSET 21
+#define COMPANION_SMALL_EXPERIENCE_OFFSET 22
+#define COMPANION_MAX_HP_OFFSET 23
+#define COMPANION_MAX_MANA_OFFSET 24
+#define COMPANION_STRENGTH_OFFSET 25
+#define COMPANION_DEXTERITY_OFFSET 26
+#define COMPANION_INTELLIGENCE_OFFSET 27
+
+// companion equipment offsets
+#define COMPANION_LEFT_HAND_ITEM_OFFSET 28
+#define COMPANION_RIGHT_HAND_ITEM_OFFSET 29
+#define COMPANION_LEFT_SPECIAL_OFFSET 30
+#define COMPANION_RIGHT_SPECIAL_OFFSET 31
+#define COMPANION_HELMET_OFFSET 32
+#define COMPANION_BODY_ARMOR_OFFSET 33
+#define COMPANION_LEG_ARMOR_OFFSET 34
+
+// companion inventory offsets
+#define COMPANION_ITEM_1_OFFSET 35
+#define COMPANION_ITEM_2_OFFSET 36
+#define COMPANION_ITEM_3_OFFSET 37
+#define COMPANION_ITEM_4_OFFSET 38
+#define COMPANION_ITEM_5_OFFSET 39
+#define COMPANION_ITEM_6_OFFSET 40
+
+// companion flag offsets
+#define COMPANION_SCRIPT_FLAGS_OFFSET 41
+#define COMPANION_VIRTUE_FLAGS_OFFSET 42
+#define COMPANION_MORE_FLAGS_OFFSET 43
+#define COMPANION_OTHER_FLAGS_OFFSET 44
+#define COMPANION_ENCHANT_FLAGS_OFFSET 45
+
+// misc companion offsets
+#define COMPANION_MORPH_OFFSET 46
+#define COMPANION_AI_TIMER_OFFSET 47
+#define COMPANION_NC_TIMER_OFFSET 48
+#define COMPANION_TE_TIMER_OFFSET 49
+
+// companion type ids
+#define SQUIRE_ID 1
+#define KITTEN_ID 2
+#define BAT_ID 3
+#define CARRION_ID 4
+#define DRAGON_ID 5
+#define EYEBAT_ID 6
+#define FLYING_WEAPON_ID 7
+#define GREMF_ID 8
+#define GRUBBUG_ID 9
+#define GRUBMUM_ID 10
+#define LIZZLER_ID 11
+#define LUMPKIN_ID 12
+#define LURKER_ID 13
+#define MEDUSA_ID 14
+#define MUSHI_ID 15
+#define PORC_ID 16
+#define RAT_ID 17
+#define ROACHIE_ID 18
+#define SKULTON_ID 19
+#define SLIME_ID 20
+#define SNAKE_ID 21
+#define TRANCH_ID 22
+#define WARLOCK_ID 23
+#define WHELP_ID 24
+#define WRAITHE_ID 25
+#define WUFF_ID 26
+#define ZOMBI_ID 27
+
+// strings
+#define APPEND_LIMIT 255
+#define APPEND_NAMES_STRING String(7)
+#define GET_NAME_STRING String(8)
+#define IMPORT_SAVES_STRING String(9)
+#define LOAD_CHARACTER_STRING String(10)
+#define LOAD_COMPANIONS_STRING String(11)
+#define READ_SAVE_SLOT_STRING String(12)
+#define SAVE_CHARACTER_STRING String(13)
+
+AppendNames(int out, int limit)
+  int i
+
+  i = 1
+  while(i <= SLOT_COUNT)
+    StringClear(APPEND_NAMES_STRING)
+    if(GetName(i, APPEND_NAMES_STRING, limit) > 0)
+      StringAppend(out, APPEND_NAMES_STRING, APPEND_LIMIT)
+    else
+      if(i < 10)
+        StringAppend(out, "0", APPEND_LIMIT)
+      StringAppendNumber(out, i, APPEND_LIMIT)
+      StringAppend(out, ". *EMPTY*", APPEND_LIMIT)
+
+    if(i != SLOT_COUNT)
+      StringAppend(out, ",", APPEND_LIMIT)
+    i++
+
+int GetClass(int slot)
+  return ReadSaveSlot(slot, CLASS_OFFSET)
+
+int GetBodyArmor(int slot)
+  return ReadSaveSlot(slot, BODY_ARMOR_OFFSET)
+
+int GetCompanionOffset(int index)
+  return (COMPANION_SIZE * index + COMPANIONS_OFFSET)
+
+int GetCompanionScript(int type)
+  int result
+
+  result = 0
+  if(type == SQUIRE_ID)
+    result = "FILE:CSQUIRE.RUN"
+  if(type == KITTEN_ID)
+    result = "FILE:CKITTEN.RUN"
+  if(type == BAT_ID)
+    result = "FILE:CBAT.RUN"
+  if(type == CARRION_ID)
+    result = "FILE:CCARRION.RUN"
+  if(type == DRAGON_ID)
+    result = "FILE:CDRAGON.RUN"
+  if(type == EYEBAT_ID)
+    result = "FILE:CEYEBAT.RUN"
+  if(type == FLYING_WEAPON_ID)
+    result = "FILE:CFLYWEP.RUN"
+  if(type == GREMF_ID)
+    result = "FILE:CGREMF.RUN"
+  if(type == GRUBBUG_ID)
+    result = "FILE:CGRUBBUG.RUN"
+  if(type == GRUBMUM_ID)
+    result = "FILE:CGRUBMUM.RUN"
+  if(type == LIZZLER_ID)
+    result = "FILE:CLIZZER.RUN"
+  if(type == LUMPKIN_ID)
+    result = "FILE:CLUMPKIN.RUN"
+  if(type == LURKER_ID)
+    result = "FILE:CLURKER.RUN"
+  if(type == MEDUSA_ID)
+    result = "FILE:CMEDUSA.RUN"
+  if(type == MUSHI_ID)
+    result = "FILE:CMUSHI.RUN"
+  if(type == PORC_ID)
+    result = "FILE:CPORC.RUN"
+  if(type == RAT_ID)
+    result = "FILE:CRAT.RUN"
+  if(type == ROACHIE_ID)
+    result = "FILE:CROACHIE.RUN"
+  if(type == SKULTON_ID)
+    result = "FILE:CSKULTON.RUN"
+  if(type == SLIME_ID)
+    result = "FILE:CSLIME.RUN"
+  if(type == SNAKE_ID)
+    result = "FILE:CSNAKE.RUN"
+  if(type == TRANCH_ID)
+    result = "FILE:CTRANCH.RUN"
+  if(type == WARLOCK_ID)
+    result = "FILE:CWARLOCK.RUN"
+  if(type == WHELP_ID)
+    result = "FILE:CWHELP.RUN"
+  if(type == WRAITHE_ID)
+    result = "FILE:CWRAITHE.RUN"
+  if(type == WUFF_ID)
+    result = "FILE:CWUFF.RUN"
+  if(type == ZOMBI_ID)
+    result = "FILE:CZOMBI.RUN"
+
+  return result
+
+int GetCompanionType(int index)
+  int companion_script
+  int result
+  companion_script = SystemGet(SYS_CHARACTERSCRIPTFILE, 0, index)
+
+  result = 0
+  if(companion_script == "FILE:CSQUIRE.RUN")
+    result = SQUIRE_ID
+  if(companion_script == "FILE:CKITTEN.RUN")
+    result = KITTEN_ID
+  if(companion_script == "FILE:CBAT.RUN")
+    result = BAT_ID
+  if(companion_script == "FILE:CCARRION.RUN")
+    result = CARRION_ID
+  if(companion_script == "FILE:CDRAGON.RUN")
+    result = DRAGON_ID
+  if(companion_script == "FILE:CEYEBAT.RUN")
+    result = EYEBAT_ID
+  if(companion_script == "FILE:CFLYWEP.RUN")
+    result = FLYING_WEAPON_ID
+  if(companion_script == "FILE:CGREMF.RUN")
+    result = GREMF_ID
+  if(companion_script == "FILE:CGRUBBUG.RUN")
+    result = GRUBBUG_ID
+  if(companion_script == "FILE:CGRUBMUM.RUN")
+    result = GRUBMUM_ID
+  if(companion_script == "FILE:CLIZZER.RUN")
+    result = LIZZLER_ID
+  if(companion_script == "FILE:CLUMPKIN.RUN")
+    result = LUMPKIN_ID
+  if(companion_script == "FILE:CLURKER.RUN")
+    result = LURKER_ID
+  if(companion_script == "FILE:CMEDUSA.RUN")
+    result = MEDUSA_ID
+  if(companion_script == "FILE:CMUSHI.RUN")
+    result = MUSHI_ID
+  if(companion_script == "FILE:CPORC.RUN")
+    result = PORC_ID
+  if(companion_script == "FILE:CRAT.RUN")
+    result = RAT_ID
+  if(companion_script == "FILE:CROACHIE.RUN")
+    result = ROACHIE_ID
+  if(companion_script == "FILE:CSKULTON.RUN")
+    result = SKULTON_ID
+  if(companion_script == "FILE:CSLIME.RUN")
+    result = SLIME_ID
+  if(companion_script == "FILE:CSNAKE.RUN")
+    result = SNAKE_ID
+  if(companion_script == "FILE:CTRANCH.RUN")
+    result = TRANCH_ID
+  if(companion_script == "FILE:CWARLOCK.RUN")
+    result = WARLOCK_ID
+  if(companion_script == "FILE:CWHELP.RUN")
+    result = WHELP_ID
+  if(companion_script == "FILE:CWRAITHE.RUN")
+    result = WRAITHE_ID
+  if(companion_script == "FILE:CWUFF.RUN")
+    result = WUFF_ID
+  if(companion_script == "FILE:CZOMBI.RUN")
+    result = ZOMBI_ID
+
+  return result
+
+GetFilePath(int slot, int out)
+  StringClear(out)
+  StringAppend(out, "SAVES\", APPEND_LIMIT)
+  if(slot < 10)
+    StringAppend(out, "0", APPEND_LIMIT)
+  StringAppendNumber(out, slot, APPEND_LIMIT)
+  StringAppend(out, ".DAT", APPEND_LIMIT)
+
+int GetHelmet(int slot)
+  return ReadSaveSlot(slot, HELMET_OFFSET)
+
+int GetLeftHandItem(int slot)
+  return ReadSaveSlot(slot, LEFT_HAND_ITEM_OFFSET)
+
+int GetLegArmor(int slot)
+  return ReadSaveSlot(slot, LEG_ARMOR_OFFSET)
+
+int GetMaxHP(int slot)
+  return ReadSaveSlot(slot, MAX_HP_OFFSET)
+
+GetName(int slot, int out, int limit)
+  int handle
+  int offset
+  int result
+  int value
+
+  if(limit < 1)
+    limit = NAME_LENGTH
+
+  GetFilePath(slot, GET_NAME_STRING)
+  handle = FileOpen(GET_NAME_STRING, FILE_NORMAL)
+  offset = 0
+  result = 0
+  while((offset < NAME_LENGTH) && (offset < limit))
+    value = FileReadByte(handle, offset)
+    if(value != 0)
+      result++
+    StringSetValue(out, offset, value)
+    offset++
+
+  // null terminator for shorter strings
+  if(limit < NAME_LENGTH)
+    StringSetValue(out, offset, FileReadByte(handle, NAME_LENGTH - 1))
+
+  return result
+
+int GetPrimaryColour(int slot)
+  return ReadSaveSlot(slot, PRIMARY_COLOUR_OFFSET)
+
+int GetRightHandItem(int slot)
+  return ReadSaveSlot(slot, RIGHT_HAND_ITEM_OFFSET)
+
+int GetSecondaryColour(int slot)
+  return ReadSaveSlot(slot, SECONDARY_COLOUR_OFFSET)
+
+int GetTETimer(int slot)
+  return ReadSaveSlot(slot, TE_TIMER_OFFSET)
+
+ImportSaves()
+  int i
+  int size
+
+  size = FileOpen("SAVELOCK.DAT", FILE_SIZE)
+  if(SystemGet(SYS_DEVTOOL, 0, 0) || size <= 0)
+    FileOpen("SAVELOCK.DAT", FILE_IMPORT)
+    i = 1
+    while(i <= SLOT_COUNT)
+      GetFilePath(i, IMPORT_SAVES_STRING)
+      FileOpen(IMPORT_SAVES_STRING, FILE_IMPORT)
+      i++
+
+LoadCharacter(int binding, int slot)
+  int handle
+
+  GetFilePath(slot, LOAD_CHARACTER_STRING)
+  handle = FileOpen(LOAD_CHARACTER_STRING, FILE_NORMAL)
+
+  // details
+  GetName(slot, binding.name, NAME_LENGTH)
+  binding.eqcol01 = GetPrimaryColour(slot)
+  binding.eqcol23 = GetSecondaryColour(slot)
+  binding.height = FileReadByte(handle, HEIGHT_OFFSET)
+
+  // stats
+  binding.level = FileReadByte(handle, LEVEL_OFFSET)
+  binding.statpts = FileReadByte(handle, STAT_POINTS_OFFSET)
+  binding.exp = FileReadByte(handle, BIG_EXPERIENCE_OFFSET) * 256
+  binding.exp = binding.exp + FileReadByte(handle, SMALL_EXPERIENCE_OFFSET)
+  binding.hitsmax = GetMaxHP(slot)
+  binding.manamax = FileReadByte(handle, MAX_MANA_OFFSET)
+  binding.manatap = FileReadByte(handle, TAPPED_MANA_OFFSET)
+  binding.manacst = FileReadByte(handle, MANA_PROGRESS_OFFSET)
+  binding.str = FileReadByte(handle, STRENGTH_OFFSET)
+  binding.dex = FileReadByte(handle, DEXTERITY_OFFSET)
+  binding.int = FileReadByte(handle, INTELLIGENCE_OFFSET)
+
+  // virtues
+  binding.vircomp = FileReadByte(handle, COMPASSION_OFFSET)
+  binding.virdill = FileReadByte(handle, DILLIGENCE_OFFSET)
+  binding.virhono = FileReadByte(handle, HONOR_OFFSET)
+  binding.virfait = FileReadByte(handle, FAITH_OFFSET)
+  binding.vircour = FileReadByte(handle, COURAGE_OFFSET)
+
+  // equipment
+  binding.eqleft = GetLeftHandItem(slot)
+  binding.eqright = GetRightHandItem(slot)
+  binding.eqspec1 = FileReadByte(handle, LEFT_SPECIAL_OFFSET)
+  binding.eqspec2 = FileReadByte(handle, RIGHT_SPECIAL_OFFSET)
+  binding.eqhelm = GetHelmet(slot)
+  binding.eqbody = GetBodyArmor(slot)
+  binding.eqlegs = GetLegArmor(slot)
+
+  // inventory
+  binding.money = FileReadByte(handle, BIG_MONEY_OFFSET) * 256
+  binding.money = binding.money + FileReadByte(handle, SMALL_MONEY_OFFSET)
+  binding.keys = FileReadByte(handle, KEYS_OFFSET)
+  binding.item00 = FileReadByte(handle, ITEM_1_OFFSET)
+  binding.item01 = FileReadByte(handle, ITEM_2_OFFSET)
+  binding.item02 = FileReadByte(handle, ITEM_3_OFFSET)
+  binding.item03 = FileReadByte(handle, ITEM_4_OFFSET)
+  binding.item04 = FileReadByte(handle, ITEM_5_OFFSET)
+  binding.item05 = FileReadByte(handle, ITEM_6_OFFSET)
+  binding.item06 = FileReadByte(handle, ITEM_7_OFFSET)
+  binding.item07 = FileReadByte(handle, ITEM_8_OFFSET)
+  binding.item08 = FileReadByte(handle, ITEM_9_OFFSET)
+  binding.item09 = FileReadByte(handle, ITEM_10_OFFSET)
+  binding.item10 = FileReadByte(handle, ITEM_11_OFFSET)
+  binding.item11 = FileReadByte(handle, ITEM_12_OFFSET)
+  binding.item12 = FileReadByte(handle, ITEM_13_OFFSET)
+  binding.item13 = FileReadByte(handle, ITEM_14_OFFSET)
+  binding.item14 = FileReadByte(handle, ITEM_15_OFFSET)
+  binding.item15 = FileReadByte(handle, ITEM_16_OFFSET)
+
+  // flags
+  binding.sflags = FileReadByte(handle, SCRIPT_FLAGS_OFFSET)
+  binding.vflags = FileReadByte(handle, VIRTUE_FLAGS_OFFSET)
+  binding.mflags = FileReadByte(handle, MORE_FLAGS_OFFSET)
+  binding.oflags = FileReadByte(handle, OTHER_FLAGS_OFFSET)
+  binding.eflags = FileReadByte(handle, ENCHANT_FLAGS_OFFSET)
+
+  // misc
+  binding.morphoc = FileReadByte(handle, MORPH_OFFSET)
+  binding.tetimer = GetTETimer(slot)
+
+  // reset health
+  binding.hits = binding.hitsmax
+  binding.hitstap = 0
+  binding.mana = binding.manamax - binding.manatap
+  binding.food = MAX_FOOD
+
+LoadCompanions(int binding, int slot)
+  int companion
+  int companion_count
+  int companion_index
+  int companion_offset
+  int companion_script
+  int companion_type
+  int handle
+  int index
+
+  GetFilePath(slot, LOAD_COMPANIONS_STRING)
+  handle = FileOpen(LOAD_COMPANIONS_STRING, FILE_NORMAL)
+  companion_count = FileReadByte(handle, COMPANION_COUNT_OFFSET)
+  companion_index = 0
+
+  while(companion_index < companion_count)
+    companion_offset = GetCompanionOffset(companion_index)
+    companion_type = FileReadByte(handle, companion_offset + COMPANION_TYPE_OFFSET)
+    companion_script = GetCompanionScript(companion_type)
+
+    if(companion_script)
+      companion = Spawn(CHARACTER, binding.x, binding.y, binding.z, companion_script)
+      if(companion)
+        // name
+        index = 0
+        while(index < NAME_LENGTH)
+          StringSetValue(companion.name, index, FileReadByte(handle, companion_offset + index))
+          index++
+
+        // details
+        companion.eqcol01 = FileReadByte(handle, companion_offset + COMPANION_PRIMARY_COLOUR_OFFSET)
+        companion.eqcol23 = FileReadByte(handle, companion_offset + COMPANION_SECONDARY_COLOUR_OFFSET)
+        companion.height = FileReadByte(handle, companion_offset + COMPANION_HEIGHT_OFFSET)
+
+        // stats
+        companion.level = FileReadByte(handle, companion_offset + COMPANION_LEVEL_OFFSET)
+        companion.exp = FileReadByte(handle, companion_offset + COMPANION_BIG_EXPERIENCE_OFFSET) * 256
+        companion.exp = companion.exp + FileReadByte(handle, companion_offset + COMPANION_SMALL_EXPERIENCE_OFFSET)
+        companion.hitsmax = FileReadByte(handle, companion_offset + COMPANION_MAX_HP_OFFSET)
+        companion.manamax = FileReadByte(handle, companion_offset + COMPANION_MAX_MANA_OFFSET)
+        companion.str = FileReadByte(handle, companion_offset + COMPANION_STRENGTH_OFFSET)
+        companion.dex = FileReadByte(handle, companion_offset + COMPANION_DEXTERITY_OFFSET)
+        companion.int = FileReadByte(handle, companion_offset + COMPANION_INTELLIGENCE_OFFSET)
+
+        // equipment
+        companion.eqleft = FileReadByte(handle, companion_offset + COMPANION_LEFT_HAND_ITEM_OFFSET)
+        companion.eqright = FileReadByte(handle, companion_offset + COMPANION_RIGHT_HAND_ITEM_OFFSET)
+        companion.eqspec1 = FileReadByte(handle, companion_offset + COMPANION_LEFT_SPECIAL_OFFSET)
+        companion.eqspec2 = FileReadByte(handle, companion_offset + COMPANION_RIGHT_SPECIAL_OFFSET)
+        companion.eqhelm = FileReadByte(handle, companion_offset + COMPANION_HELMET_OFFSET)
+        companion.eqbody = FileReadByte(handle, companion_offset + COMPANION_BODY_ARMOR_OFFSET)
+        companion.eqlegs = FileReadByte(handle, companion_offset + COMPANION_LEG_ARMOR_OFFSET)
+
+        // inventory
+        companion.item00 = FileReadByte(handle, companion_offset + COMPANION_ITEM_1_OFFSET)
+        companion.item01 = FileReadByte(handle, companion_offset + COMPANION_ITEM_2_OFFSET)
+        companion.item02 = FileReadByte(handle, companion_offset + COMPANION_ITEM_3_OFFSET)
+        companion.item03 = FileReadByte(handle, companion_offset + COMPANION_ITEM_4_OFFSET)
+        companion.item04 = FileReadByte(handle, companion_offset + COMPANION_ITEM_5_OFFSET)
+        companion.item05 = FileReadByte(handle, companion_offset + COMPANION_ITEM_6_OFFSET)
+
+        // flags
+        companion.sflags = FileReadByte(handle, companion_offset + COMPANION_SCRIPT_FLAGS_OFFSET)
+        companion.vflags = FileReadByte(handle, companion_offset + COMPANION_VIRTUE_FLAGS_OFFSET)
+        companion.mflags = FileReadByte(handle, companion_offset + COMPANION_MORE_FLAGS_OFFSET)
+        companion.oflags = FileReadByte(handle, companion_offset + COMPANION_OTHER_FLAGS_OFFSET)
+        companion.eflags = FileReadByte(handle, companion_offset + COMPANION_ENCHANT_FLAGS_OFFSET)
+
+        // misc
+        companion.morphoc = FileReadByte(handle, companion_offset + COMPANION_MORPH_OFFSET)
+        companion.aitimer = FileReadByte(handle, companion_offset + COMPANION_AI_TIMER_OFFSET)
+        companion.nctimer = FileReadByte(handle, companion_offset + COMPANION_NC_TIMER_OFFSET)
+        companion.tetimer = FileReadByte(handle, companion_offset + COMPANION_TE_TIMER_OFFSET)
+
+        // reset health
+        companion.hits = companion.hitsmax
+        companion.hitstap = 0
+        companion.mana = companion.manamax
+        companion.manatap = 0
+
+        // set ownership
+        companion.team = binding.team
+        companion.owner = FindIndex(binding)
+
+        SystemSet(SYS_CHARFASTFUNCTION, FindIndex(companion), 0, FAST_FUNCTION_MODELSETUP)
+        SystemSet(SYS_CHARFASTFUNCTION, FindIndex(companion), 0, FAST_FUNCTION_DEFENSERATING)
+
+    companion_index++
+
+int ReadSaveSlot(int slot, int offset)
+  int handle
+
+  GetFilePath(slot, READ_SAVE_SLOT_STRING)
+  handle = FileOpen(READ_SAVE_SLOT_STRING, FILE_NORMAL)
+  return FileReadByte(handle, offset)
+
+SaveCharacter(int binding, int slot)
+  int binding_index
+  int companion_index
+  int companion_offset
+  int companion_type
+  int handle
+  int index
+  int offset
+  int target
+  int value
+
+  GetFilePath(slot, SAVE_CHARACTER_STRING)
+  handle = FileOpen(SAVE_CHARACTER_STRING, FILE_NORMAL)
+  binding_index = FindIndex(binding)
+  companion_index = 0
+  index = MAX_CHARACTER
+
+  // name
+  offset = 0
+  while(offset < NAME_LENGTH)
+    value = StringGetValue(binding.name, offset)
+    FileWriteByte(handle, offset, value)
+    offset++
+
+  // details
+  FileWriteByte(handle, CLASS_OFFSET, binding.class)
+  FileWriteByte(handle, PRIMARY_COLOUR_OFFSET, binding.eqcol01)
+  FileWriteByte(handle, SECONDARY_COLOUR_OFFSET, binding.eqcol23)
+  FileWriteByte(handle, HEIGHT_OFFSET, binding.height)
+
+  // stats
+  FileWriteByte(handle, LEVEL_OFFSET, binding.level)
+  FileWriteByte(handle, STAT_POINTS_OFFSET, binding.statpts)
+  FileWriteByte(handle, BIG_EXPERIENCE_OFFSET, binding.exp / 256)
+  FileWriteByte(handle, SMALL_EXPERIENCE_OFFSET, binding.exp % 256)
+  FileWriteByte(handle, MAX_HP_OFFSET, binding.hitsmax)
+  FileWriteByte(handle, MAX_MANA_OFFSET, binding.manamax)
+  FileWriteByte(handle, TAPPED_MANA_OFFSET, binding.manatap)
+  FileWriteByte(handle, MANA_PROGRESS_OFFSET, binding.manacst)
+  FileWriteByte(handle, STRENGTH_OFFSET, binding.str)
+  FileWriteByte(handle, DEXTERITY_OFFSET, binding.dex)
+  FileWriteByte(handle, INTELLIGENCE_OFFSET, binding.int)
+
+  // virtues
+  FileWriteByte(handle, COMPASSION_OFFSET, binding.vircomp)
+  FileWriteByte(handle, DILLIGENCE_OFFSET, binding.virdill)
+  FileWriteByte(handle, HONOR_OFFSET, binding.virhono)
+  FileWriteByte(handle, FAITH_OFFSET, binding.virfait)
+  FileWriteByte(handle, COURAGE_OFFSET, binding.vircour)
+
+  // equipment
+  FileWriteByte(handle, LEFT_HAND_ITEM_OFFSET, binding.eqleft)
+  FileWriteByte(handle, RIGHT_HAND_ITEM_OFFSET, binding.eqright)
+  FileWriteByte(handle, LEFT_SPECIAL_OFFSET, binding.eqspec1)
+  FileWriteByte(handle, RIGHT_SPECIAL_OFFSET, binding.eqspec2)
+  FileWriteByte(handle, HELMET_OFFSET, binding.eqhelm)
+  FileWriteByte(handle, BODY_ARMOR_OFFSET, binding.eqbody)
+  FileWriteByte(handle, LEG_ARMOR_OFFSET, binding.eqlegs)
+
+  // inventory
+  FileWriteByte(handle, BIG_MONEY_OFFSET, binding.money / 256)
+  FileWriteByte(handle, SMALL_MONEY_OFFSET, binding.money % 256)
+  FileWriteByte(handle, KEYS_OFFSET, binding.keys)
+  FileWriteByte(handle, ITEM_1_OFFSET, binding.item00)
+  FileWriteByte(handle, ITEM_2_OFFSET, binding.item01)
+  FileWriteByte(handle, ITEM_3_OFFSET, binding.item02)
+  FileWriteByte(handle, ITEM_4_OFFSET, binding.item03)
+  FileWriteByte(handle, ITEM_5_OFFSET, binding.item04)
+  FileWriteByte(handle, ITEM_6_OFFSET, binding.item05)
+  FileWriteByte(handle, ITEM_7_OFFSET, binding.item06)
+  FileWriteByte(handle, ITEM_8_OFFSET, binding.item07)
+  FileWriteByte(handle, ITEM_9_OFFSET, binding.item08)
+  FileWriteByte(handle, ITEM_10_OFFSET, binding.item09)
+  FileWriteByte(handle, ITEM_11_OFFSET, binding.item10)
+  FileWriteByte(handle, ITEM_12_OFFSET, binding.item11)
+  FileWriteByte(handle, ITEM_13_OFFSET, binding.item12)
+  FileWriteByte(handle, ITEM_14_OFFSET, binding.item13)
+  FileWriteByte(handle, ITEM_15_OFFSET, binding.item14)
+  FileWriteByte(handle, ITEM_16_OFFSET, binding.item15)
+
+  // flags
+  FileWriteByte(handle, SCRIPT_FLAGS_OFFSET, binding.sflags)
+  FileWriteByte(handle, VIRTUE_FLAGS_OFFSET, binding.vflags)
+  FileWriteByte(handle, MORE_FLAGS_OFFSET, binding.mflags)
+  FileWriteByte(handle, OTHER_FLAGS_OFFSET, binding.oflags)
+  FileWriteByte(handle, ENCHANT_FLAGS_OFFSET, binding.eflags)
+
+  // others
+  FileWriteByte(handle, MORPH_OFFSET, binding.morphoc)
+  FileWriteByte(handle, TE_TIMER_OFFSET, binding.tetimer)
+
+  // companions
+  while((index >= 0) && (companion_index < MAX_COMPANIONS))
+    target = FindByIndex(index)
+    if(target)
+      if(target.owner == binding_index)
+        companion_type = GetCompanionType(index)
+        if(companion_type)
+          companion_offset = GetCompanionOffset(companion_index)
+
+          // name
+          offset = 0
+          while(offset < NAME_LENGTH)
+            value = StringGetValue(target.name, offset)
+            FileWriteByte(handle, companion_offset + offset, value)
+            offset++
+
+          // details
+          FileWriteByte(handle, companion_offset + COMPANION_TYPE_OFFSET, companion_type)
+          FileWriteByte(handle, companion_offset + COMPANION_PRIMARY_COLOUR_OFFSET, target.eqcol01)
+          FileWriteByte(handle, companion_offset + COMPANION_SECONDARY_COLOUR_OFFSET, target.eqcol23)
+          FileWriteByte(handle, companion_offset + COMPANION_HEIGHT_OFFSET, target.height)
+
+          // stats
+          FileWriteByte(handle, companion_offset + COMPANION_LEVEL_OFFSET, target.level)
+          FileWriteByte(handle, companion_offset + COMPANION_BIG_EXPERIENCE_OFFSET, target.exp / 256)
+          FileWriteByte(handle, companion_offset + COMPANION_SMALL_EXPERIENCE_OFFSET, target.exp % 256)
+          FileWriteByte(handle, companion_offset + COMPANION_MAX_HP_OFFSET, target.hitsmax)
+          FileWriteByte(handle, companion_offset + COMPANION_MAX_MANA_OFFSET, target.manamax)
+          FileWriteByte(handle, companion_offset + COMPANION_STRENGTH_OFFSET, target.str)
+          FileWriteByte(handle, companion_offset + COMPANION_DEXTERITY_OFFSET, target.dex)
+          FileWriteByte(handle, companion_offset + COMPANION_INTELLIGENCE_OFFSET, target.int)
+
+          // equipment
+          FileWriteByte(handle, companion_offset + COMPANION_LEFT_HAND_ITEM_OFFSET, target.eqleft)
+          FileWriteByte(handle, companion_offset + COMPANION_RIGHT_HAND_ITEM_OFFSET, target.eqright)
+          FileWriteByte(handle, companion_offset + COMPANION_LEFT_SPECIAL_OFFSET, target.eqspec1)
+          FileWriteByte(handle, companion_offset + COMPANION_RIGHT_SPECIAL_OFFSET, target.eqspec2)
+          FileWriteByte(handle, companion_offset + COMPANION_HELMET_OFFSET, target.eqhelm)
+          FileWriteByte(handle, companion_offset + COMPANION_BODY_ARMOR_OFFSET, target.eqbody)
+          FileWriteByte(handle, companion_offset + COMPANION_LEG_ARMOR_OFFSET, target.eqlegs)
+
+          // inventory
+          FileWriteByte(handle, companion_offset + COMPANION_ITEM_1_OFFSET, target.item00)
+          FileWriteByte(handle, companion_offset + COMPANION_ITEM_2_OFFSET, target.item01)
+          FileWriteByte(handle, companion_offset + COMPANION_ITEM_3_OFFSET, target.item02)
+          FileWriteByte(handle, companion_offset + COMPANION_ITEM_4_OFFSET, target.item03)
+          FileWriteByte(handle, companion_offset + COMPANION_ITEM_5_OFFSET, target.item04)
+          FileWriteByte(handle, companion_offset + COMPANION_ITEM_6_OFFSET, target.item05)
+
+          // flags
+          FileWriteByte(handle, companion_offset + COMPANION_SCRIPT_FLAGS_OFFSET, target.sflags)
+          FileWriteByte(handle, companion_offset + COMPANION_VIRTUE_FLAGS_OFFSET, target.vflags)
+          FileWriteByte(handle, companion_offset + COMPANION_MORE_FLAGS_OFFSET, target.mflags)
+          FileWriteByte(handle, companion_offset + COMPANION_OTHER_FLAGS_OFFSET, target.oflags)
+          FileWriteByte(handle, companion_offset + COMPANION_ENCHANT_FLAGS_OFFSET, target.eflags)
+
+          // misc
+          FileWriteByte(handle, companion_offset + COMPANION_MORPH_OFFSET, target.morphoc)
+          FileWriteByte(handle, companion_offset + COMPANION_AI_TIMER_OFFSET, target.aitimer)
+          FileWriteByte(handle, companion_offset + COMPANION_NC_TIMER_OFFSET, target.nctimer)
+          FileWriteByte(handle, companion_offset + COMPANION_TE_TIMER_OFFSET, target.tetimer)
+
+          companion_index++
+    index--
+  FileWriteByte(handle, COMPANION_COUNT_OFFSET, companion_index)
+  FileOpen(SAVE_CHARACTER_STRING, FILE_EXPORT)

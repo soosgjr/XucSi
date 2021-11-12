@@ -1,0 +1,2195 @@
+#define CHEAT FALSE // (SystemGet(SYS_KEYDOWN, 99, 0))
+#define CHEAT_ARMOR_VARIANT  ((RollDice(1, 4)-1)*(RollDice(1,2)-1))
+#define CHEAT_WEAPON_VARIANT ((RollDice(1, 8)-1)*(RollDice(1,2)-1))
+#define CHEAT_ITEM_00  (ITEM_TINKER)
+#define CHEAT_ITEM_01  (ITEM_SHIELD + ((RollDice(1, 4) - 1)<<2) | CHEAT_ARMOR_VARIANT)
+#define CHEAT_ITEM_02  (ITEM_HELM_1 + ((RollDice(1, 5) - 1)<<2) | CHEAT_ARMOR_VARIANT)
+#define CHEAT_ITEM_03  (ITEM_BODY_1 + ((RollDice(1, 5) - 1)<<2) | CHEAT_ARMOR_VARIANT)
+#define CHEAT_ITEM_04  (ITEM_LEGS_1 + ((RollDice(1, 5) - 1)<<2) | CHEAT_ARMOR_VARIANT)
+#define CHEAT_ITEM_05  (ITEM_RING)
+#define CHEAT_ITEM_06  (ITEM_DAGGER+((RollDice(1, 6)-1)<<3) | CHEAT_WEAPON_VARIANT)
+#define CHEAT_ITEM_07  (ITEM_HAMMER+((RollDice(1, 6)-1)<<3) | CHEAT_WEAPON_VARIANT)
+#define CHEAT_ITEM_08  (ITEM_QUIVER_10)
+#define CHEAT_ITEM_09  (ITEM_HEAL + RollDice(1, 4) - 1)
+#define CHEAT_ITEM_10  (ITEM_BOOK_5 + RollDice(1, 5) - 1)
+#define CHEAT_ITEM_11  (ITEM_ONE_UP)
+#define CHEAT_ITEM_12  RANDOM.SpellOrb(1)
+#define CHEAT_ITEM_13  RANDOM.SpellOrb(2)
+#define CHEAT_ITEM_14  RANDOM.SpellOrb(3)
+#define CHEAT_ITEM_15  RANDOM.SpellOrb(4)
+
+
+
+#define name      binding.name
+#define hits      binding.hits
+#define mana      binding.mana
+#define hits_tap  binding.hitstap
+#define mana_tap  binding.manatap
+#define hits_max  binding.hitsmax
+#define mana_max  binding.manamax
+#define keys      binding.keys
+#define money     binding.money
+#define ammo      binding.ammo
+#define gem0      self.stat00l
+#define gem1      self.stat00h
+#define gem2      self.stat01l
+#define gem3      self.stat01h
+#define icon_pick self.stat02l
+#define player    self.stat02h
+#define icon_drag self.stat03l
+#define icon_drop self.stat03h
+#define timer     self.stat04w
+#define shop_on   self.stat05l
+#define button1   self.stat05h
+#define shop_x    self.stat06w
+#define shop_y    self.stat07w
+// stat08w unused
+// stat09w unused
+// stat10w unused
+#define icon_from self.stat11w
+#define button2   self.stat12l
+#define button3   self.stat12h
+#define button4   self.stat13l
+#define button5   self.stat13h
+#define button6   self.stat14l
+#define button7   self.stat14h
+#define joy_mode  self.stat15l // !!! DO NOT MOVE!!!  Special joystick/keyboard inventory mode...  Used for joystick targeting of enchants...
+#define joy_hit   self.stat15h // !!! DO NOT MOVE!!!  Joystick buttons pressed...  Used for joystick targeting of enchants...
+#define joy_x     self.stat16l
+#define joy_y     self.stat16h
+#define joy_timer self.stat17l
+//self.stat17h is unused
+#define garbage_mode self.stat18l
+#define garbage_timer self.stat18h
+#define spawn_delay self.stat19l
+#define start_spawn self.stat19h
+#define shop_pet  self.stat20l
+#define mouse_shop self.stat20h
+#define shop_pet_one_price self.stat21l
+#define shop_pet_two_price self.stat21h
+#define shop_pet_one_name  self.string0
+#define shop_pet_two_name  self.string1
+#define shop_pet_one_file  self.int2223
+#define shop_pet_two_file  self.int2425
+
+// txt4567 is used for the shop inventory...  Starts in
+// window data at 140...
+
+
+
+#define HITS_RED    (224<<16)
+#define POISON_GREEN (192<<8)
+#define MANA_BLUE   (255 | (64<<8))
+
+
+//-----------------------------------------------------------------------
+DrawStatusBar(float x, float y, int color, int current, int max, int tap, int poison)
+  int hurt
+  float brx, bry, texty
+  float percent, inverse, sx, ex, tlx, tly
+
+  if(poison)
+    color = POISON_GREEN
+
+
+  tlx = x
+  tly = y
+  brx = x+10.5
+  bry = y+1.1
+  WindowMegaImage(tlx,tly,  brx,tly,  brx,bry,  tlx,bry,  0.0,0.0,  1.0,1.0,  WHITE, ALPHA_TRANS | 192, "FILE:STATBAR.RGB")
+
+
+  tlx = x+0.1
+  tly = y+0.1
+  brx = x+10.4
+  bry = y+1.0
+
+  if(max > 0 && current > 0)
+    percent = (current)/ToFloat(max)
+    inverse = 1.0-percent
+    sx = tlx
+    ex = (tlx*inverse) + (brx*percent)
+    WindowMegaImage(sx,tly,  ex,tly,  ex,bry,  sx,bry,  0.0,0.0,  1.0,1.0,  color, ALPHA_NONE, NULL)
+
+  if(max > 0 && tap > 0)
+    percent = (max-tap)/ToFloat(max)
+    inverse = 1.0-percent
+    sx = (tlx*inverse) + (brx*percent)
+    ex = brx
+    tly = tly+0.30
+    bry = bry-0.30
+    WindowMegaImage(sx,tly,  ex,tly,  ex,bry,  sx,bry,  0.0,0.0,  1.0,1.0,  WHITE, ALPHA_NONE, NULL)
+
+
+
+
+
+  // Text display...
+  StringClear(String(0))
+  StringAppendNumber(String(0), current, 256)
+  StringAppend(String(0), "/", 256)
+  StringAppendNumber(String(0), max, 256)
+  color = white
+  if(poison)
+    color = GREEN
+//  WindowString(color, 17.0-StringLength(String(0)), y+0.1, String(0))
+  CenterString(color, 11.75, y+0.1, String(0))
+
+
+//-----------------------------------------------------------------------
+int LoseLevels(int self, int levels_to_lose, int items_to_destroy)
+  int i, j, k, min_str, min_dex, min_int, min_mana, low, high
+  int best_slot, best_price, item, price, index
+
+//  DebugMessage("LoseLevels() called")
+  if(self)
+    // Early exit check for low level chars...
+    self.exp = 0
+    if(self.level < 2)
+      return TRUE
+
+
+
+    // Burn up some levels...
+    while(levels_to_lose > 0)
+      if(self.level > 1)
+//        DebugMessage("Lost LEVEL...")
+        self.level--
+        if(SystemGet(SYS_PAYINGCUSTOMER, 0, 0))
+          // Paying customers get 5 points per level gain, so
+          // they also lose 5 per level lost...
+          j = 5
+        else
+          // Other players only lose 2 points per level, 'cause we
+          // feel sorry for 'em...
+          j = 2
+        while(j > 0)
+          if(self.statpts > 0)
+            // Burn up any unused statpoints first...
+            self.statpts--
+//            DebugMessage("  Lost STATPTS")
+          else
+            // Now start bleeding off stats in a weighted-random fashion...
+            k = self.hitsmax + self.manamax + self.str + self.int + self.dex
+            k = RollDice(1, k)
+            if(k <= self.hitsmax)
+              // Take away from hits...
+              if(self.hitsmax > 1)
+                self.hitsmax--
+                if(self.hits > 1)
+                  self.hits--
+                else
+                  if(self.hitstap > 0)
+                    self.hitstap--
+//                DebugMessage("  Lost HITS")
+            else
+              k = k-self.hitsmax
+              if(k <= self.manamax)
+                // Take away from mana...
+                if(self.manamax > 1)
+                  self.manamax--
+                  if(self.mana > 0)
+                    self.mana--
+                  else
+                    if(self.manatap > 0)
+                      self.manatap--
+//                  DebugMessage("  Lost MANA")
+              else
+                k = k-self.manamax
+                if(k <= self.str)
+                  // Take away from strength
+                  if(self.str > 1)
+                    self.str--
+//                    DebugMessage("  Lost STR")
+                else
+                  k = k-self.str
+                  if(k <= self.dex)
+                    // Take away from dexterity
+                    if(self.dex > 1)
+                      self.dex--
+//                      DebugMessage("  Lost DEX")
+                  else
+                    // Take away from intelligence
+                    if(self.int > 1)
+//                      DebugMessage("  Lost INT")
+                      self.int--
+          j--
+      levels_to_lose--
+      
+
+    // Set experience to current level's halfway point...
+    if(self.level > 0)
+      if(self.level > 1)
+        self.level--
+        self.exp = ExperienceFunction(FindIndex(self), EXPERIENCE_GET_NEEDED, 1, FALSE)
+        self.level++
+      self.exp = (self.exp + ExperienceFunction(FindIndex(self), EXPERIENCE_GET_NEEDED, 1, FALSE))>>1
+
+
+    // Randomly discard inventory items...
+    while(items_to_destroy > 0)
+      i = RollDice(1, 16)-1
+      item = FileReadByte(self, 224+i)
+      price = SystemGet(SYS_ITEMREGISTRYPRICE, item, 0)
+      if(price > 0 && item != ITEM_GOLD_BAR && item != ITEM_ONE_UP)
+        FileWriteByte(self, 224+i, ITEM_NONE)
+      items_to_destroy--
+
+
+    // Unequip items...
+    i = 0
+    while(i < 7)
+      k = FileReadByte(self, 242+i)
+      min_str = SystemGet(SYS_ITEMREGISTRYSTR, k, 0)
+      min_dex = SystemGet(SYS_ITEMREGISTRYDEX, k, 0)
+      min_int = SystemGet(SYS_ITEMREGISTRYINT, k, 0)
+      min_mana = SystemGet(SYS_ITEMREGISTRYMANA, k, 0)
+      if(self.str < min_str || self.dex < min_dex || self.int < min_int || self.manamax < min_mana)
+        // Equipped item doesn't meet stat requirements...
+        // First let's try moving it to an open slot in the character's
+        // inventory...
+        j = 0
+        while(j < 16)
+          if(FileReadByte(self, 224+j) == ITEM_NONE)
+            // We found an empty slot...
+            FileWriteByte(self, 224+j, k)
+            FileWriteByte(self, 242+i, ITEM_NONE)
+            j = 255
+          j++
+        if(j == 16)
+          // Our inventory is full, so let's try swapping items...
+          j = MODEL_LEFT_FILE
+          low = 1
+          high = 255
+          if(i == 1)
+            j = MODEL_RIGHT_FILE
+          if(i == 2)
+            j = MODEL_LEFT2_FILE
+          if(i == 3)
+            j = MODEL_RIGHT2_FILE
+          if(i == 4)
+            j = MODEL_HEAD_FILE
+            low = ITEM_HELM_1
+            high = ITEM_HELM_5
+          if(i == 5)
+            j = MODEL_CHEST_FILE
+            low = ITEM_BODY_1
+            high = ITEM_BODY_5
+          if(i == 6)
+            j = MODEL_LEGS_FILE
+            low = ITEM_LEGS_1
+            high = ITEM_LEGS_5
+          if(INONE.AutoEquipItem(self, j, low, high, TRUE) == FALSE)
+            // Swap failed too...  So let's throw out the least valuable
+            // item in inventory to make room for the equipped item...
+            best_slot = 255
+            best_price = 65535
+            j = 0
+            while(j < 16)
+              item = FileReadByte(self, 224+j)
+              price = SystemGet(SYS_ITEMREGISTRYPRICE, item, 0)
+              if(price < best_price && price > 0)
+                best_slot = j
+              j++
+            if(best_slot < 16)
+              // Let's discard the item we found...
+              FileWriteByte(self, 224+best_slot, k)
+              FileWriteByte(self, 242+i, ITEM_NONE)
+            else
+              // Wow...  We didn't even find anything to throw out...
+              // Let's just throw out the equipped item already...
+              FileWriteByte(self, 242+i, ITEM_NONE)
+      i++
+
+
+    // We might've lost armor, or changed weapons, so let's
+    // setup the model again...
+    index = FindIndex(self)
+    SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_MODELSETUP)
+    SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_DEFENSERATING)
+
+
+//-----------------------------------------------------------------------
+// !!!BAD!!!
+// !!!BAD!!!  Get rid of bad_text to make multilingual...
+// !!!BAD!!!
+DefenseString(float x, float y, int amount, int type, int bad_text)
+//DefenseString(float x, float y, int amount, int type, int index)
+  int self, length
+
+  self = FindSelf()
+  StringClear(String(0))
+  if(amount > 127)
+    if(amount > 246)
+      // Negative defense rating...
+      StringAppendNumber(String(0), (amount-256), 3)
+      length = 2
+    else
+      // Extra low defense rating...
+      StringAppend(String(0), "-?", 3)
+      length = 2
+  else
+    if(amount > 19)
+      // Extra high defense...
+      StringAppend(String(0), "+?", 3)
+      length = 2
+    else
+      if(amount > 9)
+        // High defense...
+        StringAppendNumber(String(0), amount, 3)
+        length = 2
+      else
+        // Normal defense rating...
+        StringAppendNumber(String(0), amount, 3)
+        length = 1
+
+  
+  WindowImage(x, y, 1.0, 1.0, NULL, bad_text, 255)
+//  WindowImage(x, y, 1.0, 1.0, NULL, StringLanguage(index), 255)
+  if(length == 1)
+    WindowString(SystemGet(SYS_DAMAGECOLOR, 0, type), x, y, String(0))
+  else
+    StringSetValue(String(1), 0, StringGetValue(String(0), 0))
+    StringSetValue(String(1), 1, 0)
+    WindowString(SystemGet(SYS_DAMAGECOLOR, 0, type), x-0.55, y, String(1))
+    StringSetValue(String(1), 0, StringGetValue(String(0), 1))
+    WindowString(SystemGet(SYS_DAMAGECOLOR, 0, type), x, y, String(1))
+
+
+//-----------------------------------------------------------------------
+NumberString(int amount, int high_amount, int index, int size, float x, float y)
+  int length, lil_size
+  StringClear(String(0))
+  StringAppend(String(0), StringLanguage(index), size)
+  length = StringLength(String(0))
+  if(amount > 9)
+    length++
+  if(amount > 99)
+    length++
+  if(amount > 999)
+    length++
+  if(amount > 9999)
+    length++
+  if(high_amount > -1)
+    length++
+    length++
+    if(high_amount > 9)
+      length++
+    if(high_amount > 99)
+      length++
+    if(high_amount > 999)
+      length++
+    if(high_amount > 9999)
+      length++
+    if(high_amount == 65535)
+      length--
+      length--
+  lil_size = size-2
+  while(length < lil_size)
+    StringAppend(String(0), " ", size)
+    length++
+  StringAppendNumber(String(0), amount, size)
+  if(high_amount > -1)
+    StringAppend(String(0), "/", size)
+    if(high_amount == 65535)
+      StringAppend(String(0), "MAX", size)
+    else
+      StringAppendNumber(String(0), high_amount, size)
+  WindowString(WHITE, x, y, String(0))
+
+//-----------------------------------------------------------------------
+GetSlotFlags(int slot)
+  // Each inventory slot has different allowable item types...
+  // Returns a mask that tells which types are allowed...
+  if(slot == 242)
+    // Left hand
+    return (ITEM_FLAG_WEAPON | ITEM_FLAG_ITEM | ITEM_FLAG_SPECIAL | ITEM_FLAG_LEFT)
+  if(slot == 243)
+    // Right hand
+    return (ITEM_FLAG_WEAPON | ITEM_FLAG_ITEM | ITEM_FLAG_SPECIAL | ITEM_FLAG_RIGHT)
+  if(slot == 244)
+    // Left special
+    return (ITEM_FLAG_ITEM | ITEM_FLAG_SPECIAL)
+  if(slot == 245)
+    // Right special
+    return (ITEM_FLAG_ITEM | ITEM_FLAG_SPECIAL)
+  if(slot == 246)
+    // Helm
+    return (ITEM_FLAG_HELM)
+  if(slot == 247)
+    // Body
+    return (ITEM_FLAG_BODY)
+  if(slot == 248)
+    // Leggings
+    return (ITEM_FLAG_LEGS)
+  // Normal inventory...
+  return 65535
+
+//-----------------------------------------------------------------------
+int IconSwap(int icon1, int icon2)
+  // Actually switches inventory/equipment items for the
+  // character...  Return code tells whether it worked or not...
+  int binding, value1, value2, index, self
+  int flags1, flags2
+  int price1, price2, amount_owed
+  int from_binding
+  int min_str, min_dex, min_int, min_mana
+  int no_slot
+  binding = FindBinding()
+  self = FindSelf()
+
+
+  // Error check...
+  if(icon1 > 253)
+    // Shouldn't happen...
+    BuzzerSound()
+    return FALSE
+
+
+
+  // Funky thing for window to window transfers...
+  from_binding = binding
+  if(icon_from < 65535)
+    from_binding = FindByIndex(icon_from)
+    icon_from = 65535  // Reset for next time
+    if(!from_binding)
+      // Character died before transfer worked?
+      BuzzerSound()
+      return FALSE
+    if(icon1 < 224 || icon1 > 251 || icon2 < 224 || (icon2 > 251 && icon2 < 254))
+      // Be careful what we allow to transfer...
+      BuzzerSound()
+      return FALSE
+
+
+
+  // Trash slot...
+  if(icon2 == 254)
+    if(icon1 < 224)
+      // Moving from shop to trash...  Hmmm...
+      BuzzerSound()
+      return FALSE
+    else
+      // Find the price of the item...  Can't throw out if can't sell...
+      value1 = FileReadByte(from_binding, icon1)
+      price1 = SystemGet(SYS_ITEMREGISTRYPRICE,  value1, 0)
+      if(price1 < 0)
+        // Can't discard item
+        BuzzerSound()
+        return FALSE
+      else
+        // Item thrown out
+        FileWriteByte(from_binding, icon1, ITEM_NONE)
+        ButtonSound()
+
+        // Need to update character, in case it was an equip'd item...
+        index = FindIndex(from_binding)
+        SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_MODELSETUP)
+        SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_DEFENSERATING)
+        return TRUE
+
+
+  // Quick equip slot...
+  if(icon2 == 255)
+    if(icon1 < 224)
+      value1 = FileReadByte(self, icon1)
+    else
+      value1 = FileReadByte(from_binding, icon1)
+    flags1 = SystemGet(SYS_ITEMREGISTRYFLAGS, value1, 0) & GetSlotFlags(icon2)
+    if(flags1 & ITEM_FLAG_WEAPON)
+      icon2 = 243
+    if(flags1 & ITEM_FLAG_SPECIAL)
+      icon2 = 244
+    if(flags1 & ITEM_FLAG_ITEM)
+      icon2 = 245
+    if(flags1 & ITEM_FLAG_LEFT)
+      icon2 = 242
+    if(flags1 & ITEM_FLAG_RIGHT)
+      icon2 = 243
+    if(flags1 & ITEM_FLAG_HELM)
+      if(binding.sflags & SCRIPT_ALLOW_HELM)
+        icon2 = 246
+    if(flags1 & ITEM_FLAG_BODY)
+      if(binding.sflags & SCRIPT_ALLOW_BODY)
+        icon2 = 247
+    if(flags1 & ITEM_FLAG_LEGS)
+      if(binding.sflags & SCRIPT_ALLOW_LEGS)
+        icon2 = 248
+    if(icon2 == 255)
+      // Had trouble...
+      BuzzerSound()
+      return FALSE
+  // Find the item type for each slot...
+  if(icon1 < 224)
+    value1 = FileReadByte(self, icon1)
+  else
+    value1 = FileReadByte(from_binding, icon1)
+  if(icon2 < 224)
+    value2 = FileReadByte(self, icon2)
+  else
+    value2 = FileReadByte(binding, icon2)
+
+
+
+
+  // Check for transfering unsellable/undroppable items 'tween characters...
+  if(from_binding != binding)
+    // Check for illegal transfers...
+    price1 = SystemGet(SYS_ITEMREGISTRYPRICE,  value1, 0)
+    if(price1 < 0)
+      BuzzerSound()
+      return FALSE
+    // New illegal check...
+    price2 = SystemGet(SYS_ITEMREGISTRYPRICE,  value2, 0)
+    if(price2 < 0)
+      BuzzerSound()
+      return FALSE
+
+
+
+
+  // Check minimum stat requirements...
+  if(icon2 > 239 && icon2 < 249)
+    min_str = SystemGet(SYS_ITEMREGISTRYSTR, value1, 0)
+    min_dex = SystemGet(SYS_ITEMREGISTRYDEX, value1, 0)
+    min_int = SystemGet(SYS_ITEMREGISTRYINT, value1, 0)
+    min_mana = SystemGet(SYS_ITEMREGISTRYMANA, value1, 0)
+    if(binding.str < min_str || binding.dex < min_dex || binding.int < min_int || binding.manamax < min_mana)
+      // Minimum stat requirement not met...
+      BuzzerSound()
+      return FALSE
+
+
+  // Check minimum stat requirements...
+  if(icon1 > 239 && icon1 < 249)
+    min_str = SystemGet(SYS_ITEMREGISTRYSTR, value2, 0)
+    min_dex = SystemGet(SYS_ITEMREGISTRYDEX, value2, 0)
+    min_int = SystemGet(SYS_ITEMREGISTRYINT, value2, 0)
+    min_mana = SystemGet(SYS_ITEMREGISTRYMANA, value2, 0)
+    if(from_binding.str < min_str || from_binding.dex < min_dex || from_binding.int < min_int || from_binding.manamax < min_mana)
+      // Minimum stat requirement not met...  But don't bother if we're selling...
+      if(icon2 < 140 || icon2 > 155)
+        BuzzerSound()
+        return FALSE
+
+
+
+  // Check flags to make sure swap is okay...
+  flags1 = SystemGet(SYS_ITEMREGISTRYFLAGS, value1, 0) & GetSlotFlags(icon2)
+  flags2 = SystemGet(SYS_ITEMREGISTRYFLAGS, value2, 0) & GetSlotFlags(icon1)
+  if((flags1 && flags2) || (icon2 < 224))
+    // Are we buying from a shop???
+    if(icon1 < 224 || icon2 < 224)
+      // Yes, we've got a shop operation going...
+      if(icon1 < 224 && icon2 < 224)
+        // Error check...  Trying to sell shop item to shop...
+        BuzzerSound()
+        return FALSE
+
+
+      // Determine how much it's gonna cost us...
+      price1 = SystemGet(SYS_ITEMREGISTRYPRICE,  value1, 0)
+      price2 = SystemGet(SYS_ITEMREGISTRYPRICE,  value2, 0)
+      if(price1 < 0 || price2 < 0)
+        // Some items can't be sold...
+        BuzzerSound()
+        return FALSE
+
+
+
+      if(icon1 < 224)
+        // Buying item1 from shop, and selling back some other item...
+        if(value2 == ITEM_GOLD_BAR)
+          // Gold bar is sold at full value...
+          amount_owed = price1 - price2
+        else
+          // Others sold at half price
+          amount_owed = price1 - ((price2)>>1)
+      else
+        // Selling item1 to shop, no exchange...
+        if(value1 == ITEM_GOLD_BAR)
+          // Gold bar is sold at full value...
+          amount_owed = -(price1)
+        else
+          // Others sold at half price
+          amount_owed = -((price1)>>1)
+
+
+
+      // Do we have enough money for the transaction?
+      if(amount_owed > binding.money)
+        // Nope...
+        BuzzerSound()
+        return FALSE
+
+
+      // Yup...  Do the money transfer...
+      binding.money = binding.money-amount_owed
+      if(binding.money > MAX_MONEY)
+        binding.money = MAX_MONEY
+
+
+      // Then do the item exchange...
+      if(icon1 < 224)
+        // Buying an item from shop...
+        FileWriteByte(binding, icon2, value1)
+      else
+        // Selling an item to the shop...
+        FileWriteByte(binding, icon1, ITEM_NONE)
+
+
+      // Switched some icons...  Need to call the binding's
+      // ModelSetup() and DefenseRating() functions...
+      index = FindIndex(binding)
+      SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_MODELSETUP)
+      SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_DEFENSERATING)
+      ButtonSound()
+    else
+      // Nope, this is a simple inventory exchange...
+      FileWriteByte(from_binding, icon1, value2)
+      FileWriteByte(binding, icon2, value1)
+      // Switched some icons...  Need to call the binding's
+      // ModelSetup() and DefenseRating() functions...
+      index = FindIndex(binding)
+      SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_MODELSETUP)
+      SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_DEFENSERATING)
+      if(from_binding != binding)
+        // Also need to update whoever the items came from...  Funky
+        // inter-window stuff...
+        index = FindIndex(from_binding)
+        SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_MODELSETUP)
+        SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_DEFENSERATING)
+      ButtonSound()
+  else
+    BuzzerSound()
+
+//-----------------------------------------------------------------------
+int MockText(float x, float y, int text)
+  int length
+  float lx, ty, rx, by
+
+  length = StringLength(text)
+  lx = x - (length*0.5) - 0.5
+  rx = x + (length*0.5) + 0.5
+  ty = y - 0.625
+  by = y + 0.625
+  WindowMegaImage(lx,ty,  lx+0.5,ty,  lx+0.5,by,  lx,by,  0.0,0.0,  0.02,1.0,  WHITE, ALPHA_TRANS | 180, "FILE:WINALT.RGB")
+  WindowMegaImage(lx+0.5,ty,  rx-0.5,ty,  rx-0.5,by,  lx+0.5,by,  0.02,0.0,  0.98,1.0,  WHITE, ALPHA_TRANS | 180, "FILE:WINALT.RGB")
+  WindowMegaImage(rx-0.5,ty,  rx,ty,  rx,by,  rx-0.5,by,  0.98,0.0,  1.00,1.0,  WHITE, ALPHA_TRANS | 180, "FILE:WINALT.RGB")
+  WindowString(WHITE, lx+0.5, ty+0.125, text)
+
+
+//-----------------------------------------------------------------------
+int RowIcon(int icon_index, float x, float y)
+  int self, click, image_file, name_valid, item_type, binding, price
+  int mouseover
+  int last_object, last_item, last_script, target, worked
+  int item_ammo, overlay_file, item_flags, min_str, min_dex, min_int, min_mana
+  int item_script, index, joy_index, draw_trash, i, draw_coins, color
+  float msx, msy, offx, offy, scale
+
+
+  self = FindSelf()
+  binding = FindBinding()
+  price = -1
+
+
+  // Figure funky stuff for joystick/keyboard access mode...
+  joy_index = 0
+  if(joy_mode)
+    if(joy_x >= 0 && joy_x <= 5)
+      if(joy_y >= 5 && joy_y <= 8)
+        joy_index = 224 + joy_x + ((joy_y-5)*6)
+        if(joy_y == 7)
+          joy_index--
+          if(joy_x == 0)
+            joy_index = 254
+          if(joy_x == 5)
+            joy_index = 255
+        if(joy_y == 8)
+          // Shop access...
+          joy_index = 140 + joy_x
+
+    
+  // Figure out which item we're drawing...
+  if(icon_index > 253)
+    // Special quick equip slot...  Or trash...
+    item_type = ITEM_NONE
+  else
+    // Other slots...
+    if(icon_index < 224)
+      // Shop's inventory...
+      item_type = FileReadByte(self, icon_index)
+    else
+      // Character's inventory or equipment...
+      item_type = FileReadByte(binding, icon_index)
+
+
+  // Get the image...  Some slots have special images...
+  image_file = SystemGet(SYS_ITEMREGISTRYICON, item_type, 0)
+  min_str = SystemGet(SYS_ITEMREGISTRYSTR, item_type, 0)
+  min_dex = SystemGet(SYS_ITEMREGISTRYDEX, item_type, 0)
+  min_int = SystemGet(SYS_ITEMREGISTRYINT, item_type, 0)
+  min_mana = SystemGet(SYS_ITEMREGISTRYMANA, item_type, 0)
+  item_flags = SystemGet(SYS_ITEMREGISTRYFLAGS, item_type, 0)
+  color = WHITE
+  if(item_flags != 65535)
+    if(binding.str < min_str || binding.dex < min_dex || binding.int < min_int || binding.manamax < min_mana)
+      color = DARK_RED
+    if(item_flags & ITEM_FLAG_HELM)
+      if(!(binding.sflags & SCRIPT_ALLOW_HELM))
+        color = DARK_RED
+    if(item_flags & ITEM_FLAG_BODY)
+      if(!(binding.sflags & SCRIPT_ALLOW_BODY))
+        color = DARK_RED
+    if(item_flags & ITEM_FLAG_LEGS)
+      if(!(binding.sflags & SCRIPT_ALLOW_LEGS))
+        color = DARK_RED
+    if(binding.virfait == 255)
+      if(item_type == ITEM_PORC || item_type == ITEM_PORC_ROTTEN || item_type == ITEM_MEAT || item_type == ITEM_MEAT_ROTTEN || item_type == ITEM_SPELL_ANIMATE_DEAD)
+        color = DARK_RED
+    if(binding.vircour == 255)
+      if(item_type == ITEM_HEAL || item_type == ITEM_SUPER_HEAL || item_type == ITEM_ONE_UP)
+        color = DARK_RED
+  overlay_file=SystemGet(SYS_ITEMREGISTRYOVERLAY, item_type, 0)
+  if(item_type == ITEM_NONE && icon_index > 245)
+    image_file = "FILE:=IGNONE.RGB"
+    if(icon_index == 254)
+      image_file = "FILE:=ITRASH.RGB"
+    if(icon_index == 255)
+      image_file = "FILE:=IEQUIP.RGB"
+
+
+
+  // Find the mouse position,,,
+  msx = SystemGet(SYS_CURSORPOS, 0, 0) * 0.01
+  msy = SystemGet(SYS_CURSORPOS, 0, 1) * 0.01
+  mouseover = FALSE
+  if(msx > x && msy > y)
+    if(msx < (x+3.0) && msy < (y+3.0))
+      mouseover = TRUE
+
+
+
+  // Draw the icon image...  
+  scale = 1.5
+  click = 0
+  draw_trash = FALSE
+  draw_coins = FALSE
+  name_valid = FALSE
+
+
+
+  if(icon_drag == icon_index || icon_index == joy_index)
+    if(SystemGet(SYS_ITEMREGISTRYNAME, item_type, 0))
+      if(shop_on && gem3)
+        price = SystemGet(SYS_ITEMREGISTRYPRICE, item_type, 0)
+        if(price < 0)
+          StringAppend(NAME_STRING, " (CANNOT SELL)", 256)
+        else
+          if(icon_index >= 224)
+            if(item_type != ITEM_GOLD_BAR)
+              // Selling price of items is usually half of buying price...
+              price = price>>1
+          StringAppend(NAME_STRING, " ($", 256)
+          StringAppendNumber(NAME_STRING, price, 256)
+          StringAppend(NAME_STRING, ")", 256)
+      name_valid = TRUE
+
+
+
+
+  if(icon_drag == icon_index)
+    // Write the item name into the mouse text, but not if
+    // we're pointin' at a character...
+    worked = TRUE
+    last_object = SystemGet(SYS_MOUSELASTOBJECT, 0, 0)
+    if(last_object == 0)
+      last_item = SystemGet(SYS_MOUSELASTITEM, 0, 0)
+      target = FindByIndex(last_item)
+      if(target)
+        worked = FALSE
+    if(worked && name_valid)
+      SystemSet(SYS_MOUSETEXT, 0, 0, NAME_STRING)
+    WindowMegaImage(x-0.5,y-0.5,  x+3.5,y-0.5,  x+3.5,y+3.5,  x-0.5,y+3.5,  0.0,0.0,  1.0,1.0,  color, ALPHA_NONE, image_file)
+    DrawHighlight(x-0.5, y-0.5, timer, color)
+    offx = 0.5
+    offy = 2.5
+  else
+    if(mouseover || (icon_index == joy_index))
+      WindowMegaImage(x-0.5,y-0.5,  x+3.5,y-0.5,  x+3.5,y+3.5,  x-0.5,y+3.5,  0.0,0.0,  1.0,1.0,  color, ALPHA_NONE, image_file)
+      click = WindowImage(x-0.5, y-0.5, 4.0, 4.0, NULL, NULL, 0)
+      if(icon_index == joy_index)
+        if(name_valid)
+          // Draw a Mouse Text looking thing under the icon...
+          MockText(x+1.5, y+4.0, NAME_STRING)
+        DrawHighlight(x-0.5, y-0.5, timer, color)
+        if(garbage_mode)
+          // Draw a little garbage can over icon...
+          draw_trash = TRUE
+        if(shop_on && gem3)
+          // Draw a little buy/sell thing over icon...
+          draw_coins = TRUE
+      offx = 0.5
+      offy = 2.5
+    else
+      WindowMegaImage(x,y,  x+3.0,y,  x+3.0,y+3.0,  x,y+3.0,  0.0,0.0,  1.0,1.0,  color, ALPHA_NONE, image_file)
+      offx = 0.5
+      offy = 2.0
+      scale = 1.0
+
+
+
+  // Draw the overlay...
+  if(overlay_file)
+    if(item_flags & ITEM_FLAG_ITEM)
+      DrawOverlay(x+0.5, y+0.5, timer<<1, overlay_file, 255, color+WHITE>>1, scale)
+    else
+      DrawOverlay(x+offx*2.0, y+offy*0.33, timer<<1, overlay_file, 255, color+WHITE>>1, scale)
+  if(draw_trash)
+    DrawOverlay(x+0.5, y+0.5, timer<<1, "FILE:=ITRASH.RGB", 255, WHITE, scale)
+  if(draw_coins && price >= 0)
+    if(joy_y == 8)
+      DrawBuySell(x, y, TRUE)
+    else
+      DrawBuySell(x, y, FALSE)
+
+
+
+
+  // Draw the ammo amount for certain item types...
+  item_ammo = SystemGet(SYS_ITEMREGISTRYAMMO, item_type, 0)
+  if(item_ammo > 0)
+    StringClear(String(0))
+    StringAppendNumber(String(0), item_ammo, 3)
+    if(item_ammo < 10)
+      offx = offx + 0.5
+    WindowString(WHITE, x+offx, y+offy, String(0))
+
+
+  // Swap items...
+  if(icon_drop)
+    if(mouseover)
+      // Switch icons...  icon_pick and icon_index...
+      icon_drop = FALSE
+      if(icon_pick != icon_index || icon_from != 65535)
+        IconSwap(icon_pick, icon_index)
+
+
+
+  // Handle clicking on items...
+  if(click == 255)
+    // Try to pick up the item with our cursor...
+    if(item_type != ITEM_NONE)
+      if(SystemGet(SYS_ENCHANTCURSOR, 0, ENCHANT_CURSOR_ACTIVE))
+        // Actually, we're trying to target the item for an enchantment...
+        SystemSet(SYS_ENCHANTCURSOR, self.binding, icon_index, self)
+        return 0
+      else
+        // Pick it up...
+        icon_pick = icon_index
+        icon_drag = icon_index
+        icon_drop = FALSE
+        icon_from = 65535
+        ButtonSound()
+  else
+    if(joy_hit < 4 && joy_index == icon_index && icon_drag != icon_index)
+      // Item is selected with joystick funky thing and one of the 4 buttons was hit...
+      if(item_type != ITEM_NONE)
+        if(garbage_mode)
+          // Try to discard this item...
+          if(joy_hit == 3)
+            price = SystemGet(SYS_ITEMREGISTRYPRICE, item_type, 0)
+            if(price >= 0 && icon_index >= 224 && icon_index < 240)
+              // Discard the item...
+              FileWriteByte(binding, icon_index, ITEM_NONE)
+              ButtonSound()
+            else
+              // Cannot sell/discard
+              BuzzerSound()
+        else
+          if(!SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_ITEMS_DOWN))
+            if(shop_on && gem3)
+              // We're either buying or selling the desired item...
+              if(joy_y == 8)
+                // We're trying to buy the item...  Look
+                // through inventory for an open slot...
+                i = 224
+                while(i < 240)
+                  if(FileReadByte(binding, i) == ITEM_NONE)
+                    // We found an empty slot...
+                    icon_from = 65535 // Just in case
+                    IconSwap(icon_index, i)
+                    i = 250
+                  i++
+                if(i == 240)
+                  // No room left in inventory...
+                  BuzzerSound()
+              else
+                // We're trying to sell the item...
+                icon_from = 65535 // Just in case
+                IconSwap(icon_index, 140)
+            else
+              // Try to do the direct usage for this item...
+              SystemSet(SYS_ITEMINDEX, 0, 0, item_type)
+              item_script = SystemGet(SYS_ITEMREGISTRYSCRIPT, item_type, 0)
+              SystemSet(SYS_KEEPITEM, 0, 0, TRUE)
+              SystemSet(SYS_FASTFUNCTION, self, item_script, FAST_FUNCTION_DIRECTUSAGE)
+              if(SystemGet(SYS_FASTFUNCTIONFOUND, 0, 0))
+                // Use up the item if DirectUsage said it's a one use type of thing...
+                if(SystemGet(SYS_KEEPITEM, 0, 0) == FALSE)
+                  FileWriteByte(binding, icon_index, ITEM_NONE)
+              else
+                // This item didn't have a DirectUsage script, so we'll auto-equip it instead...
+                if(item_flags & (ITEM_FLAG_HELM | ITEM_FLAG_BODY | ITEM_FLAG_LEGS))
+                  // Auto Equip armor...
+                  icon_from = 65535 // Just in case
+                  IconSwap(icon_index, 255)
+                else
+                  // Otherwise swap it to desired slot...
+                  icon_from = 65535 // Just in case
+                  IconSwap(icon_index, 242+joy_hit)
+    else
+      if(mouseover)
+        // Cursor is over, but not left clicking...  Check for right clicks...
+        if(item_type != ITEM_NONE && (SystemGet(SYS_CURSORBUTTONPRESSED, 0, 1) || SystemGet(SYS_CURSORBUTTONPRESSED, 0, 2)))
+          if(icon_index < 224)
+            // Don't allow direct usage of shop items...
+            BuzzerSound()
+          else
+            // Don't allow direct usage while we're dragging an item either...
+            if(icon_drag != icon_index)
+              // Try to do the direct usage for this item...
+              SystemSet(SYS_ITEMINDEX, 0, 0, item_type)
+              item_script = SystemGet(SYS_ITEMREGISTRYSCRIPT, item_type, 0)
+              SystemSet(SYS_KEEPITEM, 0, 0, TRUE)
+              SystemSet(SYS_FASTFUNCTION, self, item_script, FAST_FUNCTION_DIRECTUSAGE)
+              if(SystemGet(SYS_FASTFUNCTIONFOUND, 0, 0))
+                // Use up the item if DirectUsage said it's a one use type of thing...
+                if(SystemGet(SYS_KEEPITEM, 0, 0) == FALSE)
+                  FileWriteByte(binding, icon_index, ITEM_NONE)
+              else
+                // This item didn't have a DirectUsage script, so we'll auto-equip it instead...
+                icon_from = 65535 // Just in case
+                IconSwap(icon_index, 255)
+  return item_type
+
+
+//-----------------------------------------------------------------------
+DrawHighlight(float x, float y, int cycle, int color)
+  float lx, rx
+  float ty, by
+  float size
+  float y
+  int alpha
+
+  size = sin(cycle*0.00549316)
+  alpha = 200-(size*50)
+  size = (size*0.100)+0.950
+  size = size*2.0
+
+  x = x+2.0
+  y = y+2.0
+  lx = x - size
+  rx = x + size
+  ty = y - size
+  by = y + size
+  WindowMegaImage(lx,ty,  rx,ty,  rx,by,  lx,by,  0.0,0.0,  1.0,1.0,  color, ALPHA_LIGHT | alpha, "FILE:ICSELECT.RGB")
+
+//-----------------------------------------------------------------------
+DrawStatHighlight(float x, float y, float width, float height, float scale, int cycle, int color)
+  float lx, rx
+  float ty, by
+  float size
+  float y
+  int alpha
+
+  size = sin(cycle*0.00549316)
+  alpha = 200-(size*50)
+  size = (size*0.100)+0.950
+  size = size*scale
+
+  lx = x - size - width
+  rx = x + size + width
+  ty = y - size - height
+  by = y + size + height
+  WindowMegaImage(lx,ty,  rx,ty,  rx,by,  lx,by,  0.0,0.0,  1.0,1.0,  color, ALPHA_LIGHT | alpha, "FILE:ICSELECT.RGB")
+
+//-----------------------------------------------------------------------
+DrawOverlay(float x, float y, int cycle, int overlay_file, int alpha, int color, float scale)
+  float lx, rx
+  float ty, by
+  float size
+  float y
+
+  size = sin(cycle*0.00549316)
+  size = (size*0.100)+0.750
+  size = size*scale
+
+  x = x+1.0
+  y = y+1.0
+  lx = x - size
+  rx = x + size
+  ty = y - size
+  by = y + size
+  WindowMegaImage(lx,ty,  rx,ty,  rx,by,  lx,by,  0.0,0.0,  1.0,1.0, color, ALPHA_TRANS | alpha, overlay_file)
+
+
+//-----------------------------------------------------------------------
+DrawBuySell(float x, float y, int buy)
+  int image_file
+  float lx, rx
+  float ty, by
+  float sizex, sizey
+  float y
+
+  x = x+1.5
+  y = y+2.0
+  if(buy)
+    sizex = 1.5
+    sizey = 0.75
+    image_file = "FILE:=BUY.RGB"
+  else
+    sizex = 1.3
+    sizey = 0.65
+    image_file = "FILE:=SELL.RGB"
+  lx = x - sizex
+  rx = x + sizex
+  ty = y - sizey
+  by = y + sizey
+  WindowMegaImage(lx,ty,  rx,ty,  rx,by,  lx,by,  0.0,0.0,  1.0,1.0, WHITE, ALPHA_TRANS | 255, image_file)
+
+
+//-----------------------------------------------------------------------
+Spawn()
+  int    self
+  self = FindSelf()
+  player = self.z
+  gem0 = FALSE
+  gem1 = FALSE
+  gem2 = FALSE
+  gem3 = FALSE
+  timer = 0
+  icon_pick = 224
+  icon_drag = 0
+  icon_drop = FALSE
+  icon_from = 65535    // Only used in item transfers from window to window...
+  shop_on = FALSE
+  shop_x = 0
+  shop_y = 0
+  spawn_delay = 0
+  start_spawn = TRUE
+
+  button1 = 0
+  button2 = 0
+  button3 = 0
+  button4 = 0
+  button5 = 0
+  button6 = 0
+  button7 = 0
+
+  SystemSet(SYS_LOCALPLAYERINPUT, player, 0, TRUE)
+  joy_mode = FALSE
+  joy_hit = 255
+  joy_x = 0
+  joy_y = 5
+  joy_timer = 0
+  garbage_mode = FALSE
+  garbage_timer = 0
+  self.binding = SystemGet(SYS_LOCALPLAYER, player, 0)
+  JustifyVertical(self, TRUE)
+
+  shop_pet = FALSE
+  mouse_shop = FALSE
+  if(player >= 0 && player < 4)
+    mouse_shop = FileReadByte("FILE:CONFIG.DAT", 284+(player<<5))
+
+
+//-----------------------------------------------------------------------
+Badge(int virtue, int type, float x, float y)
+  int image, badge_text
+
+  if(virtue == 255)
+    if(type == 0)
+      image = "FILE:=BADCOMP.RGB"
+    if(type == 1)
+      image = "FILE:=BADDILL.RGB"
+    if(type == 2)
+      image = "FILE:=BADHONO.RGB"
+    if(type == 3)
+      image = "FILE:=BADFAIT.RGB"
+    if(type == 4)
+      image = "FILE:=BADCOUR.RGB"
+    badge_text = StringLanguage(78 + type)
+    WindowImage(9.7 + (1.4*type), 0.2, 2.0, 2.0, image, badge_text, 255)
+  if(virtue > 100)
+    virtue = 100
+  NumberString(virtue, -1, 72+type, 18, x, y)
+
+//-----------------------------------------------------------------------
+CenterVertical(int self)
+  float size, statsize, remain, scale
+  int binding
+
+  size = 2.0
+  binding = FindByIndex(self.binding)
+  gem0 = FALSE
+  gem1 = FALSE
+  gem2 = FALSE
+  gem3 = TRUE
+  scale = ((SystemGet(SYS_WINDOWSCALE, 0, 0) * 0.00166666666) + 6.0)
+  statsize = size*scale
+  size = size + 1.75 + 11.75
+  if(shop_on && gem3)
+    size = size + 7.75
+  size = size * scale
+
+
+  remain = 300.0 - size
+  if(gem2 == FALSE)
+    remain = remain-11.75*scale
+    if(remain > 0.0)
+      gem2 = TRUE
+    else
+      remain = remain+11.75*scale
+  self.y = (remain * 0.5) + scale
+
+//-----------------------------------------------------------------------
+JustifyVertical(int self, int force)
+  float scale, size
+  int binding
+
+  binding = FindByIndex(self.binding)
+  size = 2.0
+  if(gem0)
+    // Text stats window has fixed size...
+    size = 8.0
+  size = size + 0.75
+  if(gem1)
+    size = size+7.75
+  if(gem2)
+    size = size+11.75
+  if(gem3)
+    size = size+11.75
+  if(shop_on && gem3)
+    size = size+7.75
+  scale = ((SystemGet(SYS_WINDOWSCALE, 0, 0) * 0.00166666666) + 6.0)
+  size = size*scale
+  if(self.y + size > 300.0 || force)
+    self.y = 300.0 - size
+
+//-----------------------------------------------------------------------
+int TargetUnpressAll(int target)
+  int index
+
+
+  if(target)
+    index = FindIndex(target)
+    if(target.baxis & 16)
+      target.event = 8 | BUTTON_LEFT
+      SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_BUTTONEVENT)
+    if(target.baxis & 32)
+      target.event = 8 | BUTTON_RIGHT
+      SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_BUTTONEVENT)
+    if(target.baxis & 64)
+      target.event = 8 | BUTTON_SPECIAL1
+      SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_BUTTONEVENT)
+    if(target.baxis & 128)
+      target.event = 8 | BUTTON_SPECIAL2
+      SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_BUTTONEVENT)
+    target.bflags = 0
+    target.baxis = 0
+
+//-----------------------------------------------------------------------
+int SpecialDragDropStuff()
+  int self, c, last_object, last_item, last_script, item_type
+  int index, target, binding, worked
+  float x, y
+
+
+  self = FindSelf()
+  binding = FindBinding()
+  if(binding)
+    icon_drop = FALSE
+    if(icon_drag)
+      x = SystemGet(SYS_CURSORPOS, 0, 0)*0.01
+      y = SystemGet(SYS_CURSORPOS, 0, 1)*0.01
+      c = SystemGet(SYS_CURSORBUTTONDOWN, 0, 0)
+      if(c)
+        if(RowIcon(icon_drag, x-1.0, y-1.0) == ITEM_NONE)
+          icon_drag = 0
+          icon_drop = FALSE
+      else
+        // Put the icon down...
+        icon_drop = TRUE
+        icon_drag = 0
+
+
+        // Are we dropping on another window or on a character?
+        // Transfers within the same window are handled when
+        // RowIcon() gets around to it...  Other transfers are
+        // handled directly...
+        last_object = SystemGet(SYS_MOUSELASTOBJECT, 0, 0)
+        if(last_object != self)
+          worked = FALSE
+          icon_drop = FALSE
+          last_item   = SystemGet(SYS_MOUSELASTITEM, 0, 0)
+          last_script = SystemGet(SYS_MOUSELASTSCRIPT, 0, 0)
+          // Find item type like above...
+          if(icon_pick >= 224 && icon_pick <= 251)
+            // Find the type of item to transfer...
+            item_type = FileReadByte(binding, icon_pick)
+
+            // Find the target of the item transfer
+            if(last_object == 0)
+              // Trying to give to a character...
+              target = FindByIndex(last_item)
+              if(target && target != binding)
+                if(SystemGet(SYS_ITEMREGISTRYPRICE, item_type, 0) >= 0)
+                  if(GiveItemToCharacter(target, item_type))
+                    FileWriteByte(binding, icon_pick, ITEM_NONE)
+
+                    // Switched some icons...  Need to call the binding's
+                    // ModelSetup() and DefenseRating() functions...
+                    index = FindIndex(binding)
+                    SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_MODELSETUP)
+                    SystemSet(SYS_CHARFASTFUNCTION, index, 0, FAST_FUNCTION_DEFENSERATING)
+                    worked = TRUE
+            else
+              // Trying to drop on some other window?
+              if(last_script == "FILE:WSTATUS.RUN" || last_script == "FILE:WHELPER.RUN")
+                last_object.stat02l = icon_pick
+                last_object.stat03l = icon_drag
+                last_object.stat03h = TRUE
+                last_object.stat11w = self.binding
+                worked = 3
+          // Make sure we don't screw things up...
+          item_type = ITEM_NONE
+          if(worked == TRUE)
+            ButtonSound()
+          if(worked == FALSE)
+            BuzzerSound()
+
+//-----------------------------------------------------------------------
+#define MODE_CANRESPAWN     0
+#define MODE_CANRESPAWNTOWN 1
+#define MODE_CANNOTRESPAWN  2
+Refresh()
+  int    self, c, binding, child, icon_index, max, bubble_string
+  int    blue_green, alpha
+  int    last_object, last_item, last_script, worked, item_type, target, index
+  int    lowy, highy, mode, curroom, script_file, temp
+  int    statmax
+  float  disx, disy
+  float  x, y, ypos, size
+  int    slot
+
+
+  // Make sure our binding is valid
+  self = FindSelf()
+  self.binding = SystemGet(SYS_LOCALPLAYER, player, 0)
+  binding = FindBinding()
+  if(!binding)
+    // Player is no longer active...  That means the character
+    // either left the room or was poof'd...  Try to figger out
+    // if we should let 'em respawn...
+    SystemSet(SYS_RESPAWNCHARACTER, 0, 0, self.binding)
+    binding = FindBinding()
+    if(binding)
+      // Okay we respawn'd 'em temporarily...
+      mode = MODE_CANNOTRESPAWN
+      curroom = MAPGEN.GetCurrentRoom()
+      if(MAPGEN.GetRoomFlags(curroom) & MAP_ROOM_FLAG_TOWN)
+        mode = MODE_CANRESPAWNTOWN
+      else
+        if(CharacterHasItem(binding, ITEM_ONE_UP, FALSE))
+          if(binding.vircour != 255)
+            mode = MODE_CANRESPAWN
+
+
+      // Draw a little status window...
+      TitleBar(TRUE, 0.0, 0.0, name)
+      WindowBorder(FALSE, -8.5, 0.0, 17, 2, BORDER_BOX)
+      if(mode == MODE_CANNOTRESPAWN)
+        // Game over...
+        CenterString(WHITE, 8.5, 0.5, "GAME OVER")
+      else
+        // Check for player wanting to respawn...
+        CenterString(WHITE, 8.5, 0.5, "RESPAWN READY")
+        temp = FALSE
+        if(SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_LEFT))
+          temp = TRUE
+        if(SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_RIGHT))
+          temp = TRUE
+        if(SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_SPECIAL1))
+          temp = TRUE
+        if(SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_SPECIAL2))
+          temp = TRUE
+        if(start_spawn)
+          temp = TRUE
+        if(temp)
+          // To find out this character's animation & flags & stuff, we'll need
+          // to temporarily spawn another of its type...
+          script_file = SystemGet(SYS_CHARACTERSCRIPTFILE, 0, self.binding)
+          if(script_file)
+            SystemSet(SYS_GLOBALSPAWN, 0, GLOBAL_SPAWN_TEAM, binding.team)
+            SystemSet(SYS_GLOBALSPAWN, 0, GLOBAL_SPAWN_SUBTYPE, binding.eqcol01)
+            SystemSet(SYS_GLOBALSPAWN, 0, GLOBAL_SPAWN_CLASS, binding.class)
+
+
+            child = Spawn(CHARACTER, 0.0, 0.0, 20.0, script_file)
+            if(child)
+              if(mode == MODE_CANRESPAWN)
+                // Cost us a Wunnup's cup and a lot of Courage...
+                CharacterHasItem(binding, ITEM_ONE_UP, TRUE)
+                ExperienceFunction(self.binding, EXPERIENCE_VIRTUE_COURAGE, -100, FALSE)
+              else
+                // Cost us half of our levels to respawn in town...
+                // Also cost us some random items (if we actually lose a level)...
+                if(binding.class < 100)   //CHECK FOR LOADING (XENON MOD)
+                  LoseLevels(binding, binding.level>>1, 8)
+              // !!!BAD!!!
+              // !!!BAD!!! Position character better...
+              // !!!BAD!!!
+              binding.x = 0.0
+              binding.y = 0.0
+              binding.z = RoomHeightXY(binding.x, binding.y)
+              binding.vx = 0.0
+              binding.vy = 0.0
+              binding.vz = 0.0
+              binding.hits = binding.hitsmax
+              binding.hitstap = 0
+              binding.rltimer = 30
+              binding.rrtimer = 30
+              binding.intimer = 60
+              binding.action = child.action
+              binding.daction = child.action
+              if(script_file == "FILE:CZOMBI.RUN")
+                binding.action = ACTION_STAND
+                binding.daction = ACTION_STAND
+                child.flags = child.flags & (65535-CHAR_NO_COLLISION)
+                child.alpha = 255
+              binding.flags = child.flags
+              binding.sflags = child.sflags
+              binding.vspin = child.vspin
+              binding.bright = child.bright
+              if(binding.theight > binding.height)
+                binding.height = binding.theight
+              binding.boxsize = child.boxsize
+              binding.pttimer = 0
+              binding.pstimer = 0
+              
+              /////XENON MODS:Loading/////
+              if(binding.class >= 100 && binding.class <= 112)
+                binding.hits = child.hits
+                binding.hitstap = child.hitstap
+                binding.money = child.money
+                binding.keys = child.keys
+                slot = binding.class - 99
+                binding.class = SAVE.GetClass(slot)
+                SAVE.LoadCompanions(binding, slot)
+              else
+                binding.money = 0
+                binding.keys = 0
+                
+              SystemSet(SYS_LOCALPLAYERINPUT, player, 0, FALSE)
+              spawn_delay = 15
+              
+
+
+
+              // Do the respawn effect...
+              if(start_spawn)
+                start_spawn = FALSE
+              else
+                PlaySound("FILE:-GONG0.RAW", 256, 255)
+              PFLASH.FocusEffect(binding.x, binding.y, binding.z+(binding.height*0.5), (binding.boxsize+binding.height), "FILE:LITESPRK.RGB", 25)
+              PFLASH.Effect(binding, "FILE:LITESPRK.RGB", WHITE, TRUE, 1.5)
+              PFLASH.Effect(binding, "FILE:LITESPRK.RGB", (128<<16) | (128<<8) | 128, TRUE, 4.0)
+
+
+              // Make sure our character's model & stuff are right...
+              SystemSet(SYS_CHARFASTFUNCTION, self.binding, 0, FAST_FUNCTION_MODELSETUP)
+              SystemSet(SYS_CHARFASTFUNCTION, self.binding, 0, FAST_FUNCTION_DEFENSERATING)
+
+
+              // Get rid of the temporary character...
+              self.target = FindIndex(child)
+              GoPoof(POOF_TARGET_STUCK_PARTICLES)
+              GoPoof(POOF_TARGET)
+              return 0
+              // !!!BAD!!!
+              // !!!BAD!!!
+              // !!!BAD!!!
+
+      
+      // Get rid of this character again...
+      self.target = self.binding
+      GoPoof(POOF_TARGET)
+    return 0
+  else
+    // Binding is valid...  Make sure it's at least level 1,
+    // so players can level up...
+    if(binding.level < 1)
+      binding.level = 1
+
+
+    if(spawn_delay > 0)
+      spawn_delay--
+      if(spawn_delay == 0)
+        SystemSet(SYS_LOCALPLAYERINPUT, player, 0, TRUE)
+
+
+
+    // Inventory access with keyboard/joystick...  Can you say funky?
+    if(SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_ITEMS) && spawn_delay == 0)
+      if(shop_on && gem3)
+        garbage_timer = 0
+        if(joy_mode)
+          // Done accessing shop
+          ButtonSound()
+          joy_mode = FALSE
+          SystemSet(SYS_LOCALPLAYERINPUT, player, 0, TRUE)
+          if(!mouse_shop)
+            gem0 = FALSE
+            gem1 = FALSE
+            gem2 = FALSE
+            gem3 = FALSE
+            JustifyVertical(self, TRUE)
+        else
+          // Shop/Inventory Access
+          ButtonSound()
+          joy_mode = TRUE
+          SystemSet(SYS_LOCALPLAYERINPUT, player, 0, FALSE)
+          TargetUnpressAll(binding)
+          joy_x = 0
+          joy_y = 8
+      else
+        garbage_timer = 0
+        if(joy_mode)
+          ButtonSound()
+          gem0 = FALSE
+          gem1 = FALSE
+          gem2 = FALSE
+          if(!gem3 && shop_on)
+            gem3 = TRUE
+            joy_y = 5
+          else
+            gem3 = FALSE
+          JustifyVertical(self, TRUE)
+        else
+          ButtonSound()
+          joy_mode = TRUE
+          joy_timer = 0
+          SystemSet(SYS_LOCALPLAYERINPUT, player, 0, FALSE)
+          TargetUnpressAll(binding)
+          if(binding.statpts > 0 && !shop_on)
+            // Level up access
+            joy_y = 0
+            joy_x = 0
+            gem0 = TRUE
+            gem1 = FALSE
+            gem2 = FALSE
+            gem3 = FALSE
+          else
+            // Inventory Access
+            if(joy_x > 5)
+              joy_x = 5
+            if(joy_y < 5)
+              joy_y = 5
+            if(joy_y > 7)
+              joy_y = 7
+            gem0 = FALSE
+            gem1 = FALSE
+            gem2 = FALSE
+            gem3 = TRUE
+          JustifyVertical(self, TRUE)
+
+
+
+
+    // Stuff for joy-access of non-inventory menu things...
+    if(SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_ITEMS_DOWN))
+      if(!shop_on)
+        if(binding.statpts == 0)
+          if(SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_LEFT))
+            gem0 = TRUE
+            gem1 = FALSE
+            gem2 = FALSE
+            gem3 = FALSE
+            garbage_timer = 255
+            JustifyVertical(self, TRUE)
+          if(SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_RIGHT))
+            gem0 = FALSE
+            gem1 = TRUE
+            gem2 = FALSE
+            gem3 = FALSE
+            garbage_timer = 255
+            JustifyVertical(self, TRUE)
+          if(SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_SPECIAL1))
+            gem0 = FALSE
+            gem1 = FALSE
+            gem2 = TRUE
+            gem3 = FALSE
+            garbage_timer = 255
+            JustifyVertical(self, TRUE)
+    else
+      if(joy_mode && !gem3 && !shop_on && (binding.statpts == 0 || !gem0))
+        gem0 = FALSE
+        gem1 = FALSE
+        gem2 = FALSE
+        joy_mode = FALSE
+        JustifyVertical(self, TRUE)
+        SystemSet(SYS_LOCALPLAYERINPUT, player, 0, TRUE)
+
+
+
+
+    // Inventory controls with joystick...
+    joy_hit = 255
+    garbage_mode = FALSE
+    if(joy_mode)
+      if(garbage_timer < 255)
+        if(garbage_timer > 30)
+          if(shop_on == FALSE)
+            garbage_mode = SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_ITEMS_DOWN)
+        else
+          garbage_timer = garbage_timer + SystemGet(SYS_MAINFRAMESKIP, 0, 0)
+      if(SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_LEFT))
+        joy_hit = PLAYER_DEVICE_BUTTON_LEFT
+      if(SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_RIGHT))
+        joy_hit = PLAYER_DEVICE_BUTTON_RIGHT
+      if(SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_SPECIAL1))
+        joy_hit = PLAYER_DEVICE_BUTTON_SPECIAL1
+      if(SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_SPECIAL2))
+        joy_hit = PLAYER_DEVICE_BUTTON_SPECIAL2
+      x = SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_MOVE_LEFT)
+      y = SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_MOVE_UP)
+      if(joy_timer > 20)
+        lowy = 5
+        highy = 4
+        if(gem0 && binding.statpts > 0)
+          lowy = 0
+        if(gem3)
+          highy = 7
+        if(shop_on && gem3)
+          highy = 9
+        if(joy_y >= 5)
+          if(x < -50.0)
+            joy_timer = 1
+            joy_x--
+            if(joy_x > 128)
+              joy_x = 5
+          if(x > 50.0)
+            joy_timer = 1
+            joy_x++
+            if(joy_x > 5)
+              joy_x = 0
+        if(y < -50.0)
+          joy_timer = 1
+          if(joy_y-1 < lowy)
+            joy_y = highy
+          else
+            joy_y--
+        if(y > 50.0)
+          joy_timer = 1
+          if(joy_y+1 > highy)
+            joy_y = lowy
+          else
+            joy_y++
+      else
+        if(x > -50.0 && x < 50.0 && y > -50.0 && y < 50.0)
+          // Joystick is center'd...
+          joy_timer = 50
+        else
+          if(joy_timer > 0)
+            joy_timer = joy_timer + SystemGet(SYS_MAINFRAMESKIP, 0, 0)
+
+
+    // Title bar
+    TitleBar(TRUE, 0.0, 0.0, name)
+
+
+    // Size of main window...
+//    size = ((hits_max + 9) / 10) + ((mana_max + 9) / 10)
+//    if(size < 2)
+    size = 2
+    if(gem0)
+      // Text stats window has fixed size...
+      size = 8
+    y = 0.75+size
+    if(gem1)
+      y = y+7.75
+    if(gem2)
+      y = y+11.75
+    if(gem3)
+      y = y+11.75
+    if(shop_on && gem3)
+      y = y+7.75
+      
+
+
+    // Draw conditional windows...
+    // Shop window
+    if(shop_on && gem3)
+      y = y-7.75
+      WindowBorder(FALSE, -8.5, y, 17, 7, BORDER_LOW_TITLE)
+
+
+      if(shop_pet)
+        // We're selling pets, so draw the special button...
+        button1 = ButtonImage(button1, 0.0, 4.8, 17, 2.0, shop_pet_two_name)
+        button7 = ButtonImage(button7, 0.0, 2.8, 17, 2.0, shop_pet_one_name)
+
+
+
+        if(joy_mode && joy_y == 9)
+          DrawStatHighlight(8.5, 5.8, 10.0, 0.8, 1.0, timer, WHITE)
+          if(joy_hit < 4)
+            button1 = 255
+        if(joy_mode && joy_y == 8)
+          DrawStatHighlight(8.5, 3.8, 10.0, 0.8, 1.0, timer, WHITE)
+          if(joy_hit < 4)
+            button7 = 255
+        if(button1 == 255)
+          // Trying to buy pet type two...
+          if(ChildCount(binding) < MaxHelpers(binding, 0))
+            if(binding.money >= shop_pet_two_price*10)
+              ButtonSound()
+              binding.money = binding.money - shop_pet_two_price*10
+              SetSpawnTeam(binding.team)
+              SetSpawnOwner(self.binding)
+              if(shop_pet_one_file == shop_pet_two_file)
+                SetSpawnSubtype((RollDice(1, 256)&112) | 128 | (binding.eqcol23>>4))
+              else
+                SetSpawnSubtype((RollDice(1, 256)&240) | (binding.eqcol23>>4))
+              child = Spawn(CHARACTER, binding.x, binding.y, binding.z, shop_pet_two_file)
+              if(child)
+                child.spin = binding.spin
+                child.aitimer = 1
+                child.level = 1
+            else
+              BuzzerSound()
+          else
+            // !!!BAD!!!
+            // !!!BAD!!! Need a "You've got too many helpers" voice...
+            // !!!BAD!!!
+            BuzzerSound()
+        if(button7 == 255)
+          // Trying to buy pet type one...
+          if(ChildCount(binding) < MaxHelpers(binding, 0))
+            if(binding.money >= shop_pet_one_price*10)
+              ButtonSound()
+              binding.money = binding.money - shop_pet_one_price*10
+              SetSpawnTeam(binding.team)
+              SetSpawnOwner(self.binding)
+              if(shop_pet_one_file == shop_pet_two_file)
+                SetSpawnSubtype((RollDice(1, 256)&112) | (binding.eqcol23>>4))
+              else
+                SetSpawnSubtype((RollDice(1, 256)&240) | (binding.eqcol23>>4))
+              child = Spawn(CHARACTER, binding.x, binding.y, binding.z, shop_pet_one_file)
+              if(child)
+                child.spin = binding.spin
+                child.aitimer = 1
+                child.level = 1
+            else
+              BuzzerSound()
+          else
+            // !!!BAD!!!
+            // !!!BAD!!! Need a "You've got too many helpers" voice...
+            // !!!BAD!!!
+            BuzzerSound()
+      else
+        // We're selling keys, so draw the special key button...
+        button1 = ButtonImage(button1, 0.0, 5.2, 17, 2.0, "Buy \7 ($10)")
+
+
+        // We're also selling 6 items...
+        x = -0.5
+        icon_index = 140
+        while(icon_index < 146)
+          RowIcon(icon_index, x, 2.2)
+          x = x+3.000
+          icon_index++
+
+
+        // Finish up the key stuff...
+        if(joy_mode && joy_y == 9)
+          DrawStatHighlight(8.5, 6.2, 10.0, 0.8, 1.0, timer, WHITE)
+          if(joy_hit < 4)
+            button1 = 255
+        if(button1 == 255)
+          if(binding.money >= 10 && binding.keys < MAX_KEYS)
+            ButtonSound()
+            binding.money = binding.money - 10
+            binding.keys++
+          else
+            BuzzerSound()
+
+
+
+      WindowBorder(FALSE, -9.5, y+0.5, 4, 1, BORDER_FULL)
+      WindowString(WHITE, 0.0, 0.0, "Shop")
+
+
+    if(shop_on)
+      // Check for shop closure from walking away...
+      disx = (shop_x-32767) - binding.x
+      disy = (shop_y-32767) - binding.y
+      if(((disx*disx) + (disy*disy)) > 4.0)
+        shop_on = FALSE
+        gem0 = FALSE
+        gem1 = FALSE
+        gem2 = FALSE
+        gem3 = FALSE
+        icon_pick = 224
+        icon_drag = 0
+        icon_drop = FALSE
+        ButtonSound()
+        JustifyVertical(self, TRUE)
+    SystemSet(SYS_CURRENTITEM, 0, 0, 100)
+
+
+
+
+    // Items
+    if(gem3)
+      y = y-11.75
+      WindowBorder(FALSE, -8.5, y, 17, 11, BORDER_LOW_TITLE)
+
+
+      // Draw the Trash & Equip icons...
+      RowIcon(255,14.5, 8.2)  // Quick equip slot...
+      RowIcon(254,-0.5, 8.2)  // Trash
+
+
+      // Draw the inventory icons from bottom to top...
+      x = -0.5+3.0
+      icon_index = 236
+      while(icon_index < 240)
+        RowIcon(icon_index, x, 8.2)
+        x = x+3.000
+        icon_index++
+      x = -0.5
+      icon_index = 230
+      while(icon_index < 236)
+        RowIcon(icon_index, x, 5.2)
+        x = x+3.000
+        icon_index++
+      x = -0.5
+      icon_index = 224
+      while(icon_index < 230)
+        RowIcon(icon_index, x, 2.2)
+        x = x+3.000
+        icon_index++
+
+
+      // New Money
+      StringClear(String(0))
+      StringAppend(String(0), "$", 256)
+      StringAppendNumber(String(0), money, 256)
+      WindowString(WHITE, 17-StringLength(String(0)), 0.2, String(0))
+
+
+      // Keys
+      if(keys > 0)
+        StringClear(String(0))
+        if(keys > 5)
+          // Show number
+          StringAppend(String(0), "\7x", 256)
+          StringAppendNumber(String(0), keys, 256)
+        else
+          // Show individual keys
+          c = 0
+          while(c < keys)
+            StringAppend(String(0), "\7", 256)
+            c++
+        WindowString(WHITE, 17-StringLength(String(0)), 1.2, String(0))
+
+
+
+      WindowBorder(FALSE, -9.5, y+0.5, 5, 1, BORDER_FULL)
+      WindowString(WHITE, 0.0, 0.0, "Items")
+      // Cheat button...
+      if(SystemGet(SYS_DEVTOOL, 0, 0) && CHEAT)
+        if(ButtonImage(0, -0.5, -0.5, 6.0, 2.0, "Cheat") == 255)
+          binding.money = 1000
+          binding.keys = 20
+          binding.item00 = CHEAT_ITEM_00
+          binding.item01 = CHEAT_ITEM_01
+          binding.item02 = CHEAT_ITEM_02
+          binding.item03 = CHEAT_ITEM_03
+          binding.item04 = CHEAT_ITEM_04
+          binding.item05 = CHEAT_ITEM_05
+          binding.item06 = CHEAT_ITEM_06
+          binding.item07 = CHEAT_ITEM_07
+          binding.item08 = CHEAT_ITEM_08
+          binding.item09 = CHEAT_ITEM_09
+          binding.item10 = CHEAT_ITEM_10
+          binding.item11 = CHEAT_ITEM_11
+          binding.item12 = CHEAT_ITEM_12
+          binding.item13 = CHEAT_ITEM_13
+          binding.item14 = CHEAT_ITEM_14
+          binding.item15 = CHEAT_ITEM_15
+
+
+
+    SystemSet(SYS_CURRENTITEM, 0, 0, 200)
+
+
+    // Equipment
+    if(gem2)
+      y = y-11.75
+      WindowBorder(FALSE, -8.5, y, 17, 11, BORDER_LOW_TITLE)
+
+      WindowBorder(FALSE, -8.0, y+2.2, 7, 8, BORDER_BOX)
+      CenterString(WHITE, 3.5, 0.0, "Weapons")
+      RowIcon(242, 0.5, 1.0)
+      RowIcon(243, 3.5, 1.0)
+
+
+      CenterString(WHITE, 3.5, 4.0, "Special")
+      RowIcon(244, 0.5, 5.0)
+      RowIcon(245, 3.5, 5.0)
+
+
+
+
+      WindowBorder(FALSE, 0.0, y+0.2, 8, 10, BORDER_BOX)
+      if(binding.sflags & SCRIPT_ALLOW_HELM)
+        CenterString(WHITE, 2.5, 1.0, "Head")
+        RowIcon(246, 5.0, 0.0)  // Helm
+      if(binding.sflags & SCRIPT_ALLOW_BODY)
+        CenterString(WHITE, 2.5, 4.0, "Body")
+        RowIcon(247, 5.0, 3.0)  // Body Armor
+      if(binding.sflags & SCRIPT_ALLOW_LEGS)
+        CenterString(WHITE, 2.5, 7.0, "Legs")
+        RowIcon(248, 5.0, 6.0)  // Leggings
+
+
+      DefenseString(0.00, 9.0, binding.defedge, DAMAGE_EDGE, "Edge Defense")
+      DefenseString(1.40, 9.0, binding.defbash, DAMAGE_BASH, "Bash Defense")
+      DefenseString(2.80, 9.0, binding.deffire, DAMAGE_FIRE, "Fire Defense")
+      DefenseString(4.20, 9.0, binding.defice,  DAMAGE_ICE,  "Ice Defense")
+      DefenseString(5.60, 9.0, binding.defacid, DAMAGE_ACID, "Acid Defense")
+      DefenseString(7.00, 9.0, binding.defvolt, DAMAGE_VOLT, "Electric Defense")
+
+
+
+      WindowBorder(FALSE, -9.5, y+0.5, 9, 1, BORDER_FULL)
+      WindowString(WHITE, 0.0, 0.0, "Equipment")
+
+
+
+    SystemSet(SYS_CURRENTITEM, 0, 0, 300)
+
+
+    // Virtue
+    if(gem1)
+      y = y-7.75
+      WindowBorder(FALSE, -8.5, y, 17, 7, BORDER_LOW_TITLE)
+      Badge(binding.vircomp, 0, 0.0, 2.2)
+      Badge(binding.virdill, 1, 0.0, 3.2)
+      Badge(binding.virhono, 2, 0.0, 4.2)
+      Badge(binding.virfait, 3, 0.0, 5.2)
+      Badge(binding.vircour, 4, 0.0, 6.2)
+      WindowBorder(FALSE, -9.5, y+0.5, 6, 1, BORDER_FULL)
+      WindowString(WHITE, 0.0, 0.0, "Virtue")
+    SystemSet(SYS_CURRENTITEM, 0, 0, 400)
+
+
+    // Stats
+    if(gem0)
+      // Special stats window...
+      x = 1.0
+      if(binding.statpts > 0)
+        x = -0.5
+      WindowBorder(FALSE, -8.5, 0.0, 17, 8, BORDER_BOX)
+      NumberString(binding.level, -1, 52, 13, 3.0, 0.0)
+      // Stat points are next...
+      NumberString(binding.exp, ExperienceFunction(self.binding, EXPERIENCE_GET_NEEDED, 1, FALSE), 53, 17, 1.0, 2.0)
+      NumberString(binding.hits, binding.hitsmax, 50, 17, x, 3.0)
+      NumberString(binding.mana, binding.manamax, 51, 17, x, 4.0)
+      NumberString(binding.str, -1, 59, 17, x, 5.0)
+      NumberString(binding.dex, -1, 60, 17, x, 6.0)
+      NumberString(binding.int, -1, 61, 17, x, 7.0)
+
+
+
+      if(binding.statpts > 0)
+        // Show points, and allow stat purchases...
+        statmax = 20
+        if(SystemGet(SYS_PAYINGCUSTOMER, 0, 0))
+          statmax = 50
+        NumberString(binding.statpts, -1, 58, 13, 3.0, 1.0)
+        if(button2 == 255 && binding.statpts > 0)
+          button2 = 252
+          if(binding.hitsmax > 0 && binding.hitsmax < statmax)
+            binding.hits++
+            binding.hitsmax++
+            binding.statpts--
+            ButtonSound()
+          else
+            BuzzerSound()
+        if(button3 == 255 && binding.statpts > 0)
+          button3 = 252
+          if(binding.manamax < statmax)
+            binding.statpts--
+            if(binding.manamax == 0 && binding.manacst > 1)
+              binding.manacst--
+            else
+              binding.mana++
+              binding.manamax++
+            ButtonSound()
+          else
+            BuzzerSound()
+        if(button4 == 255 && binding.statpts > 0)
+          button4 = 252
+          if(binding.str < statmax)
+            binding.str++
+            binding.statpts--
+            ButtonSound()
+          else
+            BuzzerSound()
+        if(button5 == 255 && binding.statpts > 0)
+          button5 = 252
+          if(binding.dex < statmax)
+            binding.dex++
+            binding.statpts--
+            ButtonSound()
+          else
+            BuzzerSound()
+        if(button6 == 255 && binding.statpts > 0)
+          button6 = 252
+          if(binding.int < statmax)
+            binding.int++
+            binding.statpts--
+            ButtonSound()
+          else
+            BuzzerSound()
+        button2 = ButtonImage(button2, 15.5, 3.0, 2.0, 1.0, "+")
+        if(binding.manamax == 0 && binding.manacst > 1)
+          StringClear(String(0))
+          StringAppendNumber(String(0), binding.manacst, 5)
+          button3 = ButtonImage(button3, 15.5, 4.0, 2.0, 1.0, String(0))
+        else
+          button3 = ButtonImage(button3, 15.5, 4.0, 2.0, 1.0, "+")
+        button4 = ButtonImage(button4, 15.5, 5.0, 2.0, 1.0, "+")
+        button5 = ButtonImage(button5, 15.5, 6.0, 2.0, 1.0, "+")
+        button6 = ButtonImage(button6, 15.5, 7.0, 2.0, 1.0, "+")
+        if(joy_mode && joy_y < 5)
+          DrawStatHighlight(16.5, 3.5 + joy_y, 0.7, 0.4, 0.7, timer, WHITE)
+          if(!SystemGet(SYS_LOCALPLAYERINPUT, player, PLAYER_DEVICE_BUTTON_ITEMS_DOWN))
+            if(joy_hit < 4)
+              if(joy_y == 0)
+                button2 = 255
+              if(joy_y == 1)
+                button3 = 255
+              if(joy_y == 2)
+                button4 = 255
+              if(joy_y == 3)
+                button5 = 255
+              if(joy_y == 4)
+                button6 = 255
+      else
+        // Joy mode stuff...
+        if(joy_mode && joy_y < 5)
+          joy_y = 5
+      if(binding.statpts == 0)
+        // Clear out buttons...
+        button2 = 0
+        button3 = 0
+        button4 = 0
+        button5 = 0
+        button6 = 0
+    else
+      // Normal bubble stats window...
+      WindowBorder(FALSE, -8.5, 0.0, 17, size, BORDER_BOX)  // 65534)
+
+
+      // Hits
+      WindowString(WHITE, 1.0, 0.0, StringLanguage(50))
+      WSTATUS.DrawStatusBar(6.5, 0.0, HITS_RED, binding.hits, binding.hitsmax, binding.hitstap, binding.pstimer)
+
+
+      // Mana
+      if(binding.manamax > 0)
+        WindowString(WHITE, 1.0, 1.0, StringLanguage(51))
+        WSTATUS.DrawStatusBar(6.5, 1.0, MANA_BLUE, binding.mana, binding.manamax, binding.manatap, FALSE)
+
+
+
+
+//      y = 0.0
+
+
+      // Hits bar
+//      bubble_string = "\2"
+//      if(binding.pstimer > 0)
+//        bubble_string = "\3"
+//      if(hits_max > 0)
+//        x = 7.0
+//        c = 0
+//        WindowString(WHITE, 1.0, y, StringLanguage(50))
+//        while(c < hits)
+//          if(x > 16.5)
+//            x = 7.0
+//            y++
+//          WindowString(WHITE, x, y, bubble_string)
+//          c++
+//          x++
+//        max = hits_max - hits_tap
+//        while(c < max)
+//          if(x > 16.5)
+//            x = 7.0
+//            y++
+//          WindowString(WHITE, x, y, "\5")
+//          c++
+//          x++
+//        c = 0
+//        while(c < hits_tap)
+//          if(x > 16.5)
+//            x = 7.0
+//            y++
+//          WindowString(WHITE, x, y, "\6")
+//          c++
+//          x++
+
+
+
+//      // Mana bar
+//      if(mana_max > 0)
+//        x = 7.0
+//        y++
+//        c = 0
+//        WindowString(WHITE, 1.0, y, StringLanguage(51))
+//        while(c < mana)
+//          if(x > 16.5)
+//            x = 7.0
+//            y++
+//          WindowString(WHITE, x, y, "\4")
+//          c++
+//          x++
+//        max = mana_max - mana_tap
+//        while(c < max)
+//          if(x > 16.5)
+//            x = 7.0
+//            y++
+//          WindowString(WHITE, x, y, "\5")
+//          c++
+//          x++
+//        c = 0
+//        while(c < mana_tap)
+//          if(x > 16.5)
+//            x = 7.0
+//            y++
+//          WindowString(WHITE, x, y, "\6")
+//          c++
+//          x++
+
+
+    // !!!BAD!!!
+    // !!!BAD!!!
+    // !!!BAD!!!
+    // Draw prayer effect whammies that're left...
+    if(SystemGet(SYS_DEVTOOL, 0, 0) && CHEAT)
+      if(binding.vflags & VIRTUE_FLAG_HITS)
+        if(ButtonImage(0, 0.0, -0.5, 10.0, 1.0, "Whammy") == 255)
+          binding.vflags = binding.vflags & (255 - VIRTUE_FLAG_HITS)
+      else
+        if(ButtonImage(0, 0.0, -0.5, 10.0, 1.0, "NoWhammy") == 255)
+          binding.vflags = binding.vflags | VIRTUE_FLAG_HITS
+      if(SystemGet(SYS_PAYINGCUSTOMER, 0, 0))
+        if(ButtonImage(0, 0.0, 0.5, 10.0, 1.0, "Paying") == 255)
+          SystemSet(SYS_PAYINGCUSTOMER, 0, 0, FALSE)
+          binding.statpts = 0
+      else
+        if(ButtonImage(0, 0.0, 0.5, 10.0, 1.0, "NonPaying") == 255)
+          SystemSet(SYS_PAYINGCUSTOMER, 0, 0, TRUE)
+      if(ButtonImage(0, 0.0, 1.5, 10.0, 1.0, "Splash") == 255)
+        Spawn(WINDOW, 200.0, 150.0, 1.0, "FILE:WSPLASH.RUN")
+    // !!!BAD!!!
+    // !!!BAD!!!
+    // !!!BAD!!!
+
+
+
+    // Gemstones...  In corner of either stats window...
+    SystemSet(SYS_CURRENTITEM, 0, 0, 500)
+
+
+    // Stats Switch Image
+    c = 0
+    if(gem0 || (binding.statpts > 0 && timer & 64))
+      c = WindowImage(-0.6, -0.6, 1.0, 1.0, "FILE:=WINGEMG.RGB", NULL, 0)
+    else
+      c = WindowImage(-0.6, -0.6, 1.0, 1.0, "FILE:=WINGEMR.RGB", NULL, 0)
+    if(c == 255) 
+      gem0 = (gem0+1)&1
+      ButtonSound()
+      if(gem0 == FALSE)
+        joy_mode = FALSE
+        SystemSet(SYS_LOCALPLAYERINPUT, player, 0, TRUE)
+
+ 
+    // Virtue Switch Image
+    c = 0
+    if(gem1)
+      c = WindowImage(-0.6, 0.2, 1.0, 1.0, "FILE:=WINGEMG.RGB", NULL, 0)
+    else
+      c = WindowImage(-0.6, 0.2, 1.0, 1.0, "FILE:=WINGEMR.RGB", NULL, 0)
+    if(c == 255) 
+      gem1 = (gem1+1)&1
+      ButtonSound()
+
+
+    // Equipment Switch Image
+    c = 0
+    if(gem2)
+      c = WindowImage(-0.6, 1.0, 1.0, 1.0, "FILE:=WINGEMG.RGB", NULL, 0)
+    else
+      c = WindowImage(-0.6, 1.0, 1.0, 1.0, "FILE:=WINGEMR.RGB", NULL, 0)
+    if(c == 255) 
+      gem2 = (gem2+1)&1
+      ButtonSound()
+
+
+    // Items Switch Image
+    c = 0
+    if(gem3 || (shop_on > 0 && timer & 64))
+      c = WindowImage(-0.6, 1.8, 1.0, 1.0, "FILE:=WINGEMG.RGB", NULL, 0)
+    else
+      c = WindowImage(-0.6, 1.8, 1.0, 1.0, "FILE:=WINGEMR.RGB", NULL, 0)
+    if(c == 255) 
+      gem3 = (gem3+1)&1
+      ButtonSound()
+      if(gem3 == FALSE)
+        joy_mode = FALSE
+        SystemSet(SYS_LOCALPLAYERINPUT, player, 0, TRUE)
+
+
+
+
+    // Do the special drag/drop stuff...
+    SpecialDragDropStuff()
+
+
+
+
+    // Hunger indicator...
+    if(binding.food < 7650 && binding.food > 0)
+      blue_green = 255
+      alpha = 255
+      if(binding.food < 2550)
+        blue_green = 255 * (sin((52+(binding.food<<1)) % 180))
+      else
+        alpha = (5100-(binding.food-2550))/20
+      blue_green = (255 << 16) | (blue_green << 8) | (blue_green)
+
+
+      DrawOverlay(6.5 - (0.5 * StringLength(name)), -2.5, timer<<1, "FILE:=OHUNGER.RGB", alpha, blue_green, 1.5)
+      DrawOverlay(8.5 + (0.5 * StringLength(name)), -2.5, timer<<1, "FILE:=OHUNGER.RGB", alpha, blue_green, 1.5)
+
+    timer = timer + SystemGet(SYS_MAINFRAMESKIP, 0, 0)*900
+
+//-----------------------------------------------------------------------

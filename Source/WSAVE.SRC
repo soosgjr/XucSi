@@ -1,0 +1,115 @@
+#define button_one    self.stat02h
+#define button_two    self.stat03l
+#define slot1         self.stat00w
+#define slot2         self.stat13w
+#define slot3         self.stat01w
+#define slot4         self.stat04w
+#define slot_save1    self.stat12l
+#define slot_save2    self.stat14w
+#define slot_save3    self.stat16l
+#define slot_save4    self.stat17w
+
+#define KEYESCAPE  27
+
+//-----------------------------------------------------------------------
+Spawn()
+  int self
+  self = FindSelf()
+  button_one = 0
+  button_two = 0
+  slot1 = 0
+  slot2 = 0
+  slot3 = 0
+  slot4 = 0
+  slot_save1 = 0
+  slot_save2 = 0
+  slot_save3 = 0
+  slot_save4 = 0
+
+
+//-----------------------------------------------------------------------
+Refresh()
+  int curroom, self
+  
+  self = FindSelf()
+  
+  slot_save1 = slot1>>8
+  slot_save2 = slot2>>8
+  slot_save3 = slot3>>8
+  slot_save4 = slot4>>8
+  
+  
+  if(SystemGet(SYS_KEYPRESSED, KEYESCAPE, 0))
+    GoPoof(POOF_SELF)
+  
+  //Save Characters Button
+  curroom = MAPGEN.GetCurrentRoom()
+  if(MAPGEN.GetRoomFlags(curroom) & MAP_ROOM_FLAG_TOWN)
+    if(button_one == 250)
+      ButtonSound()
+      //Save Characters
+      //Player 1
+      if(slot_save1 != 0)
+        SAVE.SaveCharacter(FindByIndex(SystemGet(SYS_LOCALPLAYER, 0, 0)), slot_save1)
+      
+      //Player 2
+      if(slot_save2 != 0)
+        SAVE.SaveCharacter(FindByIndex(SystemGet(SYS_LOCALPLAYER, 1, 0)), slot_save2)
+      
+      //Player 3
+      if(slot_save3 != 0)
+        SAVE.SaveCharacter(FindByIndex(SystemGet(SYS_LOCALPLAYER, 2, 0)), slot_save3)
+      
+      //Player 4
+      if(slot_save4 != 0)
+        SAVE.SaveCharacter(FindByIndex(SystemGet(SYS_LOCALPLAYER, 3, 0)), slot_save4)
+  else
+    GoPoof(POOF_SELF)
+  
+  
+  //Continue Button
+  if(button_two == 250)
+    ButtonSound()
+    GoPoof(POOF_SELF)
+  
+  //Window Setup
+  TitleBar(TRUE, -2.5, -4.0, "Save Characters")        
+  WindowBorder(FALSE, -25.0, -4.0, 50, 18, BORDER_FULL)
+  button_one = ButtonImage(button_one,12.0, 15.0,10.0, 2.0, "Save Game")
+  button_two = ButtonImage(button_two,23.0, 15.0,10.0, 2.0, "Continue")
+  CenterString(WHITE, 6.4, 1, "Player 1")
+  CenterString(WHITE, 19.2, 1, "Player 2")
+  CenterString(WHITE, 31.6, 1, "Player 3")
+  CenterString(WHITE, 44.0, 1, "Player 4")
+
+  StringClear(String(0))
+  StringAppend(String(0), "None,", 255)
+  SAVE.AppendNames(String(0), 11)
+
+  //Setup Player 1 slots
+  if(SystemGet(SYS_PLAYERDEVICE, 0, PLAYER_DEVICE_TYPE)!=PLAYER_DEVICE_NONE)
+    slot1 = WindowMiniList(0.4, 3.0, 12, 13, slot1, String(0))
+  else
+    slot1 = WindowMiniList(0.4, 3.0, 12, 1, slot1, "None")
+  
+  //Setup Player 2 slots  
+  if(SystemGet(SYS_PLAYERDEVICE, 1, PLAYER_DEVICE_TYPE)!=PLAYER_DEVICE_NONE)
+    slot2 = WindowMiniList(12.8, 3.0, 12, 13, slot2, String(0))
+  else
+    slot2 = WindowMiniList(12.8, 3.0, 12, 1, slot2, "None")
+   
+  //Setup Player 3 slots 
+  if(SystemGet(SYS_PLAYERDEVICE, 2, PLAYER_DEVICE_TYPE)!=PLAYER_DEVICE_NONE)
+    slot3 = WindowMiniList(25.2, 3.0, 12, 13, slot3, String(0))
+  else
+    slot3 = WindowMiniList(25.2, 3.0, 12, 1, slot3, "None")
+  
+  //Setup Player 4 slots  
+  if(SystemGet(SYS_PLAYERDEVICE, 3, PLAYER_DEVICE_TYPE)!=PLAYER_DEVICE_NONE)
+    slot4 = WindowMiniList(37.6, 3.0, 12, 13, slot4, String(0))
+  else
+    slot4 = WindowMiniList(37.6, 3.0, 12, 1, slot4, "None")
+
+
+
+//-----------------------------------------------------------------------
