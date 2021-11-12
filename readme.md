@@ -107,8 +107,9 @@ The SoulFu licensing terms are available in [the game's manual](Manual.htm).
 
 ## Credits
 
-The original Character Saving mod was developed by Xuln. The version this patch
-is made for might have seen some edits from Captain Innocuous, but since the
+SoulFu was developed by [Aaron Bishop](http://www.aaronbishopgames.com). The
+original Character Saving mod was developed by Xuln. The version this patch is
+made for might have seen some edits from Captain Innocuous, but since the
 original forums are long gone and without an archive, there's no way to confirm
 this. The additional fixes and modifications were made by Gabor Soos.
 
