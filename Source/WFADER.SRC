@@ -1,0 +1,136 @@
+#define mode          self.stat00l
+#define timer         self.stat01w
+#define escape_mode   self.stat02l
+#define button_one    self.stat02h
+#define button_two    self.stat03l
+
+
+#define KEYESCAPE  27
+
+//-----------------------------------------------------------------------
+Spawn()
+  int self
+  self = FindSelf()
+  mode = 3
+  timer = 0
+  escape_mode = FALSE
+  button_one = 0
+  button_two = 0
+
+
+//-----------------------------------------------------------------------
+DrawBlack(int alpha)
+  WindowMegaImage(-22.0,-17.0,  22.0,-17.0,  22.0,17.0,  -22.0,17.0,  0.01,0.0,  1.0,1.0,  BLACK, ALPHA_TRANS | alpha, NULL)
+
+
+//-----------------------------------------------------------------------
+Refresh()
+  int    self, alpha, scaling, skip
+
+
+
+  self = FindSelf()
+  if(SystemGet(SYS_STARTGAME, 0, 0))
+    if(mode == 0)
+      // Idle mode...  Waiting for players to die...
+      if(NumLocalPlayerActive() == 0)
+        // All players are poof'd...  Go, go, go!
+        mode = 1
+        timer = 0
+        SystemSet(SYS_CURSORDRAW, 0, 0, FALSE)
+        PlayMusic("FILE:GAMEOVER.MUS", FileReadByte("FILE:GAMEOVER.MUS", 26), MUSIC_PLAY)
+    else
+      // Check if the players are back...
+      if(mode != 3)
+        if(NumLocalPlayerActive() != 0)
+          mode = 3
+          timer = 0
+
+
+    // Set the scaling to large...
+    SystemSet(SYS_WINDOWSCALE, 0, 0, 2048)
+
+
+    // Make this the topmost window...
+    SystemSet(SYS_TOPWINDOW, 0, 0, 0)
+
+
+    // Prepare to draw...
+    WindowBorder(FALSE, 0.0, 0.0, 0, 0, BORDER_NONE)
+    skip = SystemGet(SYS_MAINFRAMESKIP, 0, 0)
+
+
+
+    // Draw the fade effect, based on current mode...
+    if(mode == 3)
+      // Fade back in...
+      alpha = 255 - timer
+      if(alpha < 0)
+        // Ready to idle again...
+        alpha = 0
+        mode = 0
+        timer = 0
+        SystemSet(SYS_CURSORDRAW, 0, 0, TRUE)
+        PlayMusic(NULL, 0, MUSIC_STOP)
+      else
+        timer = timer + (skip<<3)
+      DrawBlack(alpha)
+    if(mode == 2)
+      // Full black with text that fades in...
+      DrawBlack(255)
+      CenterString(WHITE, 0.0, 0.0, "And hope was nearly lost...  Nearly...")
+      alpha = 255 - timer
+      if(alpha < 0)
+        alpha = 0
+      else
+        timer = timer + (skip<<2)
+      DrawBlack(alpha)
+    if(mode == 1)
+      // Fade out to black...
+      alpha = timer
+      if(alpha > 255)
+        // Allow respawn...
+        alpha = 255
+        timer = 0
+        mode++
+        CDOOR.ChangeRoom(SystemGet(SYS_MAPROOM, 0, MAP_ROOM_LAST_TOWN), TRUE)
+      else
+        timer = timer + skip
+      DrawBlack(alpha)
+
+
+
+    // Reset the scaling to whatever the user wants...
+    scaling = FileReadByte("FILE:CONFIG.DAT", 64)<<8
+    SystemSet(SYS_WINDOWSCALE, 0, 0, (scaling&768)<<2)
+
+
+
+    // Draw the escape mode window...
+    if(SystemGet(SYS_KEYPRESSED, KEYESCAPE, 0))
+      ButtonSound()
+      escape_mode = !escape_mode
+    if(escape_mode)
+      if(button_one == 250)
+        ButtonSound()
+        GoPoof(POOF_ALL_OTHER_WINDOWS)
+        Spawn(WINDOW, 200.0, 150.0, 1.0, "FILE:WMAIN.RUN")
+        SystemSet(SYS_LEAVEGAME, 0, 0, 0)
+        GoPoof(POOF_SELF)
+      if(button_two == 250)
+        ButtonSound()
+        escape_mode = FALSE
+
+        
+      WindowBorder(FALSE, -10.0, -2.0, 20, 4, BORDER_FULL)
+      CenterString(WHITE, 10.0, 0.5, "Really quit?")
+      button_one = ButtonImage(button_one, 0.0, 2.0,10.0, 2.0, StringLanguage(19))
+      button_two = ButtonImage(button_two,10.0, 2.0,10.0, 2.0, StringLanguage(21))
+    else
+      button_one = 0
+      button_two = 0
+
+
+
+
+//-----------------------------------------------------------------------
