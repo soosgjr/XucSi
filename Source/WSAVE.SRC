@@ -1,0 +1,516 @@
+#define button_one    self.stat02h
+#define button_two    self.stat03l
+#define slot1         self.stat00w
+#define slot2         self.stat13w
+#define slot3         self.stat01w
+#define slot4         self.stat04w
+#define slot_save1    self.stat12l
+#define slot_save2    self.stat14w
+#define slot_save3    self.stat16l
+#define slot_save4    self.stat17w
+  
+#define KEYESCAPE  27
+
+//-----------------------------------------------------------------------
+Spawn()
+  int self
+  self = FindSelf()
+  button_one = 0
+  button_two = 0
+  slot1 = 0
+  slot2 = 0
+  slot3 = 0
+  slot4 = 0
+  slot_save1 = 0
+  slot_save2 = 0
+  slot_save3 = 0
+  slot_save4 = 0
+  
+  
+//-----------------------------------------------------------------------
+Refresh()
+  int    self, binding, curroom, string, i, j, char, temp_food, slot
+
+
+  self = FindSelf()
+ 
+  slot_save1  = slot1>>8
+  slot_save2  = slot2>>8
+  slot_save3  = slot3>>8
+  slot_save4  = slot4>>8
+ 
+ 
+  if(SystemGet(SYS_KEYPRESSED, KEYESCAPE, 0))
+    GoPoof(POOF_SELF)
+  
+  //Save Characters Button
+  curroom = MAPGEN.GetCurrentRoom()
+  if(MAPGEN.GetRoomFlags(curroom) & MAP_ROOM_FLAG_TOWN)
+    if(button_one == 250)
+      ButtonSound()
+      //Save Characters
+      self = FindSelf()
+      //Player 1
+      if(slot_save1 != 0)
+        self.binding = SystemGet(SYS_LOCALPLAYER, 0, 0)
+        binding = FindBinding()
+        slot = (slot_save1 * 100) - 100
+        i = slot
+        j = 16 + slot
+        char = 0
+        while(i < j)
+          string = StringGetValue(binding.name, char)
+          FileWriteByte("FILE:SAVE.DAT", i, string)
+          char++
+          i++
+        FileWriteByte("FILE:SAVE.DAT", 20 + slot, binding.hits)
+        FileWriteByte("FILE:SAVE.DAT", 21 + slot, binding.mana)
+        FileWriteByte("FILE:SAVE.DAT", 22 + slot, binding.hitstap)
+        FileWriteByte("FILE:SAVE.DAT", 23 + slot, binding.manatap)
+        FileWriteByte("FILE:SAVE.DAT", 24 + slot, binding.hitsmax)
+        FileWriteByte("FILE:SAVE.DAT", 25 + slot, binding.manamax)
+        FileWriteByte("FILE:SAVE.DAT", 26 + slot, binding.keys)
+        FileWriteByte("FILE:SAVE.DAT", 29 + slot, binding.class)
+        FileWriteByte("FILE:SAVE.DAT", 30 + slot, binding.str)
+        FileWriteByte("FILE:SAVE.DAT", 31 + slot, binding.dex)
+        FileWriteByte("FILE:SAVE.DAT", 32 + slot, binding.int)
+        FileWriteByte("FILE:SAVE.DAT", 33 + slot, binding.vircomp)
+        FileWriteByte("FILE:SAVE.DAT", 34 + slot, binding.virdill)
+        FileWriteByte("FILE:SAVE.DAT", 35 + slot, binding.virhono)
+        FileWriteByte("FILE:SAVE.DAT", 36 + slot, binding.virfait)
+        FileWriteByte("FILE:SAVE.DAT", 37 + slot, binding.vircour)
+        FileWriteByte("FILE:SAVE.DAT", 38 + slot, binding.height)
+        FileWriteByte("FILE:SAVE.DAT", 39 + slot, binding.sflags)
+        FileWriteByte("FILE:SAVE.DAT", 40 + slot, binding.eqcol01)
+        FileWriteByte("FILE:SAVE.DAT", 41 + slot, binding.eqcol23)
+        FileWriteByte("FILE:SAVE.DAT", 42 + slot, binding.eqleft)
+        FileWriteByte("FILE:SAVE.DAT", 43 + slot, binding.eqright)
+        FileWriteByte("FILE:SAVE.DAT", 44 + slot, binding.eqspec1)
+        FileWriteByte("FILE:SAVE.DAT", 45 + slot, binding.eqspec2)
+        FileWriteByte("FILE:SAVE.DAT", 46 + slot, binding.eqhelm)
+        FileWriteByte("FILE:SAVE.DAT", 47 + slot, binding.eqbody)
+        FileWriteByte("FILE:SAVE.DAT", 48 + slot, binding.eqlegs)
+        FileWriteByte("FILE:SAVE.DAT", 49 + slot, binding.item00)
+        FileWriteByte("FILE:SAVE.DAT", 50 + slot, binding.item01)
+        FileWriteByte("FILE:SAVE.DAT", 51 + slot, binding.item02)
+        FileWriteByte("FILE:SAVE.DAT", 52 + slot, binding.item03)
+        FileWriteByte("FILE:SAVE.DAT", 53 + slot, binding.item04)
+        FileWriteByte("FILE:SAVE.DAT", 54 + slot, binding.item05)
+        FileWriteByte("FILE:SAVE.DAT", 55 + slot, binding.item06)
+        FileWriteByte("FILE:SAVE.DAT", 56 + slot, binding.item07)
+        FileWriteByte("FILE:SAVE.DAT", 57 + slot, binding.item08)
+        FileWriteByte("FILE:SAVE.DAT", 58 + slot, binding.item09)
+        FileWriteByte("FILE:SAVE.DAT", 59 + slot, binding.item10)
+        FileWriteByte("FILE:SAVE.DAT", 60 + slot, binding.item11)
+        FileWriteByte("FILE:SAVE.DAT", 61 + slot, binding.item12)
+        FileWriteByte("FILE:SAVE.DAT", 62 + slot, binding.item13)
+        FileWriteByte("FILE:SAVE.DAT", 63 + slot, binding.item14)
+        FileWriteByte("FILE:SAVE.DAT", 64 + slot, binding.item15)
+        FileWriteByte("FILE:SAVE.DAT", 65 + slot, binding.morphoc)
+        FileWriteByte("FILE:SAVE.DAT", 66 + slot, binding.exp)
+        FileWriteByte("FILE:SAVE.DAT", 67 + slot, binding.level)
+        FileWriteByte("FILE:SAVE.DAT", 68 + slot, binding.statpts)
+        FileWriteByte("FILE:SAVE.DAT", 69 + slot, binding.oflags)
+        FileWriteByte("FILE:SAVE.DAT", 70 + slot, binding.mflags)
+        FileWriteByte("FILE:SAVE.DAT", 71 + slot, binding.vflags)
+        FileWriteByte("FILE:SAVE.DAT", 90 + slot, binding.tetimer)
+
+        if(binding.money <= 255)                             //Save Money
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, binding.money)
+        if(binding.money > 255 && binding.money <= 510)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, binding.money - 255)
+        if(binding.money > 510 && binding.money <= 765)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, binding.money - 510)
+        if(binding.money > 765 && binding.money <= 1020)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 78 + slot, binding.money - 765)   
+        if(binding.money > 1020 && binding.money <= 1275)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 78 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 79 + slot, binding.money - 1020)
+        if(binding.money > 1275 && binding.money <= 1500)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 78 + slot, 255) 
+          FileWriteByte("FILE:SAVE.DAT", 79 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 80 + slot, binding.money - 1275)  
+                
+        temp_food = binding.food / 100                     //Save Food
+        if(temp_food <= 255)
+          FileWriteByte("FILE:SAVE.DAT", 81 + slot, temp_food)
+        if(temp_food > 255)
+          FileWriteByte("FILE:SAVE.DAT", 81 + slot, temp_food)
+          FileWriteByte("FILE:SAVE.DAT", 82 + slot, temp_food)
+        temp_food = binding.food % 100
+        FileWriteByte("FILE:SAVE.DAT", 83 + slot, temp_food)
+          
+        UpdateFiles(UPDATE_SDFSAVE)
+  
+      //Player 2
+      if(slot_save2 != 0)
+        self.binding = SystemGet(SYS_LOCALPLAYER, 1, 0)
+        binding = FindBinding()
+        slot = (slot_save2 * 100) - 100
+        i = slot
+        j = 16 + slot
+        char = 0
+        while(i < j)
+          string = StringGetValue(binding.name, char)
+          FileWriteByte("FILE:SAVE.DAT", i, string)
+          char++
+          i++
+        FileWriteByte("FILE:SAVE.DAT", 20 + slot, binding.hits)
+        FileWriteByte("FILE:SAVE.DAT", 21 + slot, binding.mana)
+        FileWriteByte("FILE:SAVE.DAT", 22 + slot, binding.hitstap)
+        FileWriteByte("FILE:SAVE.DAT", 23 + slot, binding.manatap)
+        FileWriteByte("FILE:SAVE.DAT", 24 + slot, binding.hitsmax)
+        FileWriteByte("FILE:SAVE.DAT", 25 + slot, binding.manamax)
+        FileWriteByte("FILE:SAVE.DAT", 26 + slot, binding.keys)
+        FileWriteByte("FILE:SAVE.DAT", 29 + slot, binding.class)
+        FileWriteByte("FILE:SAVE.DAT", 30 + slot, binding.str)
+        FileWriteByte("FILE:SAVE.DAT", 31 + slot, binding.dex)
+        FileWriteByte("FILE:SAVE.DAT", 32 + slot, binding.int)
+        FileWriteByte("FILE:SAVE.DAT", 33 + slot, binding.vircomp)
+        FileWriteByte("FILE:SAVE.DAT", 34 + slot, binding.virdill)
+        FileWriteByte("FILE:SAVE.DAT", 35 + slot, binding.virhono)
+        FileWriteByte("FILE:SAVE.DAT", 36 + slot, binding.virfait)
+        FileWriteByte("FILE:SAVE.DAT", 37 + slot, binding.vircour)
+        FileWriteByte("FILE:SAVE.DAT", 38 + slot, binding.height)
+        FileWriteByte("FILE:SAVE.DAT", 39 + slot, binding.sflags)
+        FileWriteByte("FILE:SAVE.DAT", 40 + slot, binding.eqcol01)
+        FileWriteByte("FILE:SAVE.DAT", 41 + slot, binding.eqcol23)
+        FileWriteByte("FILE:SAVE.DAT", 42 + slot, binding.eqleft)
+        FileWriteByte("FILE:SAVE.DAT", 43 + slot, binding.eqright)
+        FileWriteByte("FILE:SAVE.DAT", 44 + slot, binding.eqspec1)
+        FileWriteByte("FILE:SAVE.DAT", 45 + slot, binding.eqspec2)
+        FileWriteByte("FILE:SAVE.DAT", 46 + slot, binding.eqhelm)
+        FileWriteByte("FILE:SAVE.DAT", 47 + slot, binding.eqbody)
+        FileWriteByte("FILE:SAVE.DAT", 48 + slot, binding.eqlegs)
+        FileWriteByte("FILE:SAVE.DAT", 49 + slot, binding.item00)
+        FileWriteByte("FILE:SAVE.DAT", 50 + slot, binding.item01)
+        FileWriteByte("FILE:SAVE.DAT", 51 + slot, binding.item02)
+        FileWriteByte("FILE:SAVE.DAT", 52 + slot, binding.item03)
+        FileWriteByte("FILE:SAVE.DAT", 53 + slot, binding.item04)
+        FileWriteByte("FILE:SAVE.DAT", 54 + slot, binding.item05)
+        FileWriteByte("FILE:SAVE.DAT", 55 + slot, binding.item06)
+        FileWriteByte("FILE:SAVE.DAT", 56 + slot, binding.item07)
+        FileWriteByte("FILE:SAVE.DAT", 57 + slot, binding.item08)
+        FileWriteByte("FILE:SAVE.DAT", 58 + slot, binding.item09)
+        FileWriteByte("FILE:SAVE.DAT", 59 + slot, binding.item10)
+        FileWriteByte("FILE:SAVE.DAT", 60 + slot, binding.item11)
+        FileWriteByte("FILE:SAVE.DAT", 61 + slot, binding.item12)
+        FileWriteByte("FILE:SAVE.DAT", 62 + slot, binding.item13)
+        FileWriteByte("FILE:SAVE.DAT", 63 + slot, binding.item14)
+        FileWriteByte("FILE:SAVE.DAT", 64 + slot, binding.item15)
+        FileWriteByte("FILE:SAVE.DAT", 65 + slot, binding.morphoc)
+        FileWriteByte("FILE:SAVE.DAT", 66 + slot, binding.exp)
+        FileWriteByte("FILE:SAVE.DAT", 67 + slot, binding.level)
+        FileWriteByte("FILE:SAVE.DAT", 68 + slot, binding.statpts)
+        FileWriteByte("FILE:SAVE.DAT", 69 + slot, binding.oflags)
+        FileWriteByte("FILE:SAVE.DAT", 70 + slot, binding.mflags)
+        FileWriteByte("FILE:SAVE.DAT", 71 + slot, binding.vflags)
+        FileWriteByte("FILE:SAVE.DAT", 90 + slot, binding.tetimer)
+
+        if(binding.money <= 255)                             //Save Money
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, binding.money)
+        if(binding.money > 255 && binding.money <= 510)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, binding.money - 255)
+        if(binding.money > 510 && binding.money <= 765)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, binding.money - 510)
+        if(binding.money > 765 && binding.money <= 1020)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 78 + slot, binding.money - 765)   
+        if(binding.money > 1020 && binding.money <= 1275)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 78 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 79 + slot, binding.money - 1020)
+        if(binding.money > 1275 && binding.money <= 1500)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 78 + slot, 255) 
+          FileWriteByte("FILE:SAVE.DAT", 79 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 80 + slot, binding.money - 1275)  
+              
+        temp_food = binding.food / 100                     //Save Food
+        if(temp_food <= 255)
+          FileWriteByte("FILE:SAVE.DAT", 81 + slot, temp_food)
+        if(temp_food > 255)
+          FileWriteByte("FILE:SAVE.DAT", 81 + slot, temp_food)
+          FileWriteByte("FILE:SAVE.DAT", 82 + slot, temp_food)
+        temp_food = binding.food % 100
+        FileWriteByte("FILE:SAVE.DAT", 83 + slot, temp_food)
+          
+        UpdateFiles(UPDATE_SDFSAVE)
+  
+  
+      //Player 3
+      if(slot_save3 != 0)
+        self.binding = SystemGet(SYS_LOCALPLAYER, 2, 0)
+        binding = FindBinding()
+        slot = (slot_save3 * 100) - 100
+        i = slot
+        j = 16 + slot
+        char = 0
+        while(i < j)
+          string = StringGetValue(binding.name, char)
+          FileWriteByte("FILE:SAVE.DAT", i, string)
+          char++
+          i++
+        FileWriteByte("FILE:SAVE.DAT", 20 + slot, binding.hits)
+        FileWriteByte("FILE:SAVE.DAT", 21 + slot, binding.mana)
+        FileWriteByte("FILE:SAVE.DAT", 22 + slot, binding.hitstap)
+        FileWriteByte("FILE:SAVE.DAT", 23 + slot, binding.manatap)
+        FileWriteByte("FILE:SAVE.DAT", 24 + slot, binding.hitsmax)
+        FileWriteByte("FILE:SAVE.DAT", 25 + slot, binding.manamax)
+        FileWriteByte("FILE:SAVE.DAT", 26 + slot, binding.keys)
+        FileWriteByte("FILE:SAVE.DAT", 29 + slot, binding.class)
+        FileWriteByte("FILE:SAVE.DAT", 30 + slot, binding.str)
+        FileWriteByte("FILE:SAVE.DAT", 31 + slot, binding.dex)
+        FileWriteByte("FILE:SAVE.DAT", 32 + slot, binding.int)
+        FileWriteByte("FILE:SAVE.DAT", 33 + slot, binding.vircomp)
+        FileWriteByte("FILE:SAVE.DAT", 34 + slot, binding.virdill)
+        FileWriteByte("FILE:SAVE.DAT", 35 + slot, binding.virhono)
+        FileWriteByte("FILE:SAVE.DAT", 36 + slot, binding.virfait)
+        FileWriteByte("FILE:SAVE.DAT", 37 + slot, binding.vircour)
+        FileWriteByte("FILE:SAVE.DAT", 38 + slot, binding.height)
+        FileWriteByte("FILE:SAVE.DAT", 39 + slot, binding.sflags)
+        FileWriteByte("FILE:SAVE.DAT", 40 + slot, binding.eqcol01)
+        FileWriteByte("FILE:SAVE.DAT", 41 + slot, binding.eqcol23)
+        FileWriteByte("FILE:SAVE.DAT", 42 + slot, binding.eqleft)
+        FileWriteByte("FILE:SAVE.DAT", 43 + slot, binding.eqright)
+        FileWriteByte("FILE:SAVE.DAT", 44 + slot, binding.eqspec1)
+        FileWriteByte("FILE:SAVE.DAT", 45 + slot, binding.eqspec2)
+        FileWriteByte("FILE:SAVE.DAT", 46 + slot, binding.eqhelm)
+        FileWriteByte("FILE:SAVE.DAT", 47 + slot, binding.eqbody)
+        FileWriteByte("FILE:SAVE.DAT", 48 + slot, binding.eqlegs)
+        FileWriteByte("FILE:SAVE.DAT", 49 + slot, binding.item00)
+        FileWriteByte("FILE:SAVE.DAT", 50 + slot, binding.item01)
+        FileWriteByte("FILE:SAVE.DAT", 51 + slot, binding.item02)
+        FileWriteByte("FILE:SAVE.DAT", 52 + slot, binding.item03)
+        FileWriteByte("FILE:SAVE.DAT", 53 + slot, binding.item04)
+        FileWriteByte("FILE:SAVE.DAT", 54 + slot, binding.item05)
+        FileWriteByte("FILE:SAVE.DAT", 55 + slot, binding.item06)
+        FileWriteByte("FILE:SAVE.DAT", 56 + slot, binding.item07)
+        FileWriteByte("FILE:SAVE.DAT", 57 + slot, binding.item08)
+        FileWriteByte("FILE:SAVE.DAT", 58 + slot, binding.item09)
+        FileWriteByte("FILE:SAVE.DAT", 59 + slot, binding.item10)
+        FileWriteByte("FILE:SAVE.DAT", 60 + slot, binding.item11)
+        FileWriteByte("FILE:SAVE.DAT", 61 + slot, binding.item12)
+        FileWriteByte("FILE:SAVE.DAT", 62 + slot, binding.item13)
+        FileWriteByte("FILE:SAVE.DAT", 63 + slot, binding.item14)
+        FileWriteByte("FILE:SAVE.DAT", 64 + slot, binding.item15)
+        FileWriteByte("FILE:SAVE.DAT", 65 + slot, binding.morphoc)
+        FileWriteByte("FILE:SAVE.DAT", 66 + slot, binding.exp)
+        FileWriteByte("FILE:SAVE.DAT", 67 + slot, binding.level)
+        FileWriteByte("FILE:SAVE.DAT", 68 + slot, binding.statpts)
+        FileWriteByte("FILE:SAVE.DAT", 69 + slot, binding.oflags)
+        FileWriteByte("FILE:SAVE.DAT", 70 + slot, binding.mflags)
+        FileWriteByte("FILE:SAVE.DAT", 71 + slot, binding.vflags)
+        FileWriteByte("FILE:SAVE.DAT", 90 + slot, binding.tetimer)
+
+        if(binding.money <= 255)                             //Save Money
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, binding.money)
+        if(binding.money > 255 && binding.money <= 510)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, binding.money - 255)
+        if(binding.money > 510 && binding.money <= 765)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, binding.money - 510)
+        if(binding.money > 765 && binding.money <= 1020)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 78 + slot, binding.money - 765)   
+        if(binding.money > 1020 && binding.money <= 1275)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 78 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 79 + slot, binding.money - 1020)
+        if(binding.money > 1275 && binding.money <= 1500)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 78 + slot, 255) 
+          FileWriteByte("FILE:SAVE.DAT", 79 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 80 + slot, binding.money - 1275)  
+              
+        temp_food = binding.food / 100                     //Save Food
+        if(temp_food <= 255)
+          FileWriteByte("FILE:SAVE.DAT", 81 + slot, temp_food)
+        if(temp_food > 255)
+          FileWriteByte("FILE:SAVE.DAT", 81 + slot, temp_food)
+          FileWriteByte("FILE:SAVE.DAT", 82 + slot, temp_food)
+        temp_food = binding.food % 100
+        FileWriteByte("FILE:SAVE.DAT", 83 + slot, temp_food)
+          
+        UpdateFiles(UPDATE_SDFSAVE)
+        
+      //Player 4
+      if(slot_save4 != 0)
+        self.binding = SystemGet(SYS_LOCALPLAYER, 3, 0)
+        binding = FindBinding()
+        slot = (slot_save4 * 100) - 100
+        i = slot
+        j = 16 + slot
+        char = 0
+        while(i < j)
+          string = StringGetValue(binding.name, char)
+          FileWriteByte("FILE:SAVE.DAT", i, string)
+          char++
+          i++
+        FileWriteByte("FILE:SAVE.DAT", 20 + slot, binding.hits)
+        FileWriteByte("FILE:SAVE.DAT", 21 + slot, binding.mana)
+        FileWriteByte("FILE:SAVE.DAT", 22 + slot, binding.hitstap)
+        FileWriteByte("FILE:SAVE.DAT", 23 + slot, binding.manatap)
+        FileWriteByte("FILE:SAVE.DAT", 24 + slot, binding.hitsmax)
+        FileWriteByte("FILE:SAVE.DAT", 25 + slot, binding.manamax)
+        FileWriteByte("FILE:SAVE.DAT", 26 + slot, binding.keys)
+        FileWriteByte("FILE:SAVE.DAT", 29 + slot, binding.class)
+        FileWriteByte("FILE:SAVE.DAT", 30 + slot, binding.str)
+        FileWriteByte("FILE:SAVE.DAT", 31 + slot, binding.dex)
+        FileWriteByte("FILE:SAVE.DAT", 32 + slot, binding.int)
+        FileWriteByte("FILE:SAVE.DAT", 33 + slot, binding.vircomp)
+        FileWriteByte("FILE:SAVE.DAT", 34 + slot, binding.virdill)
+        FileWriteByte("FILE:SAVE.DAT", 35 + slot, binding.virhono)
+        FileWriteByte("FILE:SAVE.DAT", 36 + slot, binding.virfait)
+        FileWriteByte("FILE:SAVE.DAT", 37 + slot, binding.vircour)
+        FileWriteByte("FILE:SAVE.DAT", 38 + slot, binding.height)
+        FileWriteByte("FILE:SAVE.DAT", 39 + slot, binding.sflags)
+        FileWriteByte("FILE:SAVE.DAT", 40 + slot, binding.eqcol01)
+        FileWriteByte("FILE:SAVE.DAT", 41 + slot, binding.eqcol23)
+        FileWriteByte("FILE:SAVE.DAT", 42 + slot, binding.eqleft)
+        FileWriteByte("FILE:SAVE.DAT", 43 + slot, binding.eqright)
+        FileWriteByte("FILE:SAVE.DAT", 44 + slot, binding.eqspec1)
+        FileWriteByte("FILE:SAVE.DAT", 45 + slot, binding.eqspec2)
+        FileWriteByte("FILE:SAVE.DAT", 46 + slot, binding.eqhelm)
+        FileWriteByte("FILE:SAVE.DAT", 47 + slot, binding.eqbody)
+        FileWriteByte("FILE:SAVE.DAT", 48 + slot, binding.eqlegs)
+        FileWriteByte("FILE:SAVE.DAT", 49 + slot, binding.item00)
+        FileWriteByte("FILE:SAVE.DAT", 50 + slot, binding.item01)
+        FileWriteByte("FILE:SAVE.DAT", 51 + slot, binding.item02)
+        FileWriteByte("FILE:SAVE.DAT", 52 + slot, binding.item03)
+        FileWriteByte("FILE:SAVE.DAT", 53 + slot, binding.item04)
+        FileWriteByte("FILE:SAVE.DAT", 54 + slot, binding.item05)
+        FileWriteByte("FILE:SAVE.DAT", 55 + slot, binding.item06)
+        FileWriteByte("FILE:SAVE.DAT", 56 + slot, binding.item07)
+        FileWriteByte("FILE:SAVE.DAT", 57 + slot, binding.item08)
+        FileWriteByte("FILE:SAVE.DAT", 58 + slot, binding.item09)
+        FileWriteByte("FILE:SAVE.DAT", 59 + slot, binding.item10)
+        FileWriteByte("FILE:SAVE.DAT", 60 + slot, binding.item11)
+        FileWriteByte("FILE:SAVE.DAT", 61 + slot, binding.item12)
+        FileWriteByte("FILE:SAVE.DAT", 62 + slot, binding.item13)
+        FileWriteByte("FILE:SAVE.DAT", 63 + slot, binding.item14)
+        FileWriteByte("FILE:SAVE.DAT", 64 + slot, binding.item15)
+        FileWriteByte("FILE:SAVE.DAT", 65 + slot, binding.morphoc)
+        FileWriteByte("FILE:SAVE.DAT", 66 + slot, binding.exp)
+        FileWriteByte("FILE:SAVE.DAT", 67 + slot, binding.level)
+        FileWriteByte("FILE:SAVE.DAT", 68 + slot, binding.statpts)
+        FileWriteByte("FILE:SAVE.DAT", 69 + slot, binding.oflags)
+        FileWriteByte("FILE:SAVE.DAT", 70 + slot, binding.mflags)
+        FileWriteByte("FILE:SAVE.DAT", 71 + slot, binding.vflags)
+        FileWriteByte("FILE:SAVE.DAT", 90 + slot, binding.tetimer)
+
+        if(binding.money <= 255)                             //Save Money
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, binding.money)
+        if(binding.money > 255 && binding.money <= 510)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, binding.money - 255)
+        if(binding.money > 510 && binding.money <= 765)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, binding.money - 510)
+        if(binding.money > 765 && binding.money <= 1020)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 78 + slot, binding.money - 765)   
+        if(binding.money > 1020 && binding.money <= 1275)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 78 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 79 + slot, binding.money - 1020)
+        if(binding.money > 1275 && binding.money <= 1500)
+          FileWriteByte("FILE:SAVE.DAT", 75 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 76 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 77 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 78 + slot, 255) 
+          FileWriteByte("FILE:SAVE.DAT", 79 + slot, 255)
+          FileWriteByte("FILE:SAVE.DAT", 80 + slot, binding.money - 1275)  
+              
+        temp_food = binding.food / 100                     //Save Food
+        if(temp_food <= 255)
+          FileWriteByte("FILE:SAVE.DAT", 81 + slot, temp_food)
+        if(temp_food > 255)
+          FileWriteByte("FILE:SAVE.DAT", 81 + slot, temp_food)
+          FileWriteByte("FILE:SAVE.DAT", 82 + slot, temp_food)
+        temp_food = binding.food % 100
+        FileWriteByte("FILE:SAVE.DAT", 83 + slot, temp_food)
+          
+        UpdateFiles(UPDATE_SDFSAVE)
+        
+  else
+    GoPoof(POOF_SELF)
+  
+  
+  //Continue Button
+  if(button_two == 250)
+    ButtonSound()
+    GoPoof(POOF_SELF)
+  
+  //Window Setup
+  TitleBar(TRUE, -2.5, -4.0, "Save Characters")        
+  WindowBorder(FALSE, -25.0, -4.0, 45, 18, BORDER_FULL)
+  button_one = ButtonImage(button_one,12.0, 15.0,10.0, 2.0, "Save Game")
+  button_two = ButtonImage(button_two,23.0, 15.0,10.0, 2.0, "Continue")
+  CenterString(WHITE, 7.0, 1, "Player 1")
+  CenterString(WHITE, 17.0, 1, "Player 2")
+  CenterString(WHITE, 27.0, 1, "Player 3")
+  CenterString(WHITE, 37.0, 1, "Player 4")
+  
+  
+  //Setup Player 1 slots
+  if(SystemGet(SYS_PLAYERDEVICE, 0, PLAYER_DEVICE_TYPE)!=PLAYER_DEVICE_NONE)
+    slot1 = WindowMiniList(3.0, 3.0, 8, 13, slot1, "None,Slot 1,Slot 2,Slot 3,Slot 4,Slot 5,Slot 6,Slot 7,Slot 8,Slot 9,Slot 10,Slot 11,Slot 12")
+  else
+    slot1 = WindowMiniList(3.0, 3.0, 8, 1, slot1, "None")
+  
+  //Setup Player 2 slots  
+  if(SystemGet(SYS_PLAYERDEVICE, 1, PLAYER_DEVICE_TYPE)!=PLAYER_DEVICE_NONE)
+    slot2 = WindowMiniList(13.0, 3.0, 8, 13, slot2, "None,Slot 1,Slot 2,Slot 3,Slot 4,Slot 5,Slot 6,Slot 7,Slot 8,Slot 9,Slot 10,Slot 11,Slot 12")
+  else
+    slot2 = WindowMiniList(13.0, 3.0, 8, 1, slot2, "None")
+   
+  //Setup Player 3 slots 
+  if(SystemGet(SYS_PLAYERDEVICE, 2, PLAYER_DEVICE_TYPE)!=PLAYER_DEVICE_NONE)
+    slot3 = WindowMiniList(23.0, 3.0, 8, 13, slot3, "None,Slot 1,Slot 2,Slot 3,Slot 4,Slot 5,Slot 6,Slot 7,Slot 8,Slot 9,Slot 10,Slot 11,Slot 12")
+  else
+    slot3 = WindowMiniList(23.0, 3.0, 8, 1, slot3, "None")
+  
+  //Setup Player 4 slots  
+  if(SystemGet(SYS_PLAYERDEVICE, 3, PLAYER_DEVICE_TYPE)!=PLAYER_DEVICE_NONE)
+    slot4 = WindowMiniList(33.0, 3.0, 8, 13, slot4, "None,Slot 1,Slot 2,Slot 3,Slot 4,Slot 5,Slot 6,Slot 7,Slot 8,Slot 9,Slot 10,Slot 11,Slot 12")
+  else
+    slot4 = WindowMiniList(33.0, 3.0, 8, 1, slot4, "None")
+
+
+
+//-----------------------------------------------------------------------
