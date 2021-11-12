@@ -77,4 +77,4 @@
               0x0083 NC Timer
               0x0084 TE Timer
 
-       0x0085-0x008f Reserved
+       0x0085-0x008F Reserved
